@@ -1,0 +1,8 @@
+.settings
+tmp
+bin
+target
+generated
+generated-sources
+model
+*.xml_gen

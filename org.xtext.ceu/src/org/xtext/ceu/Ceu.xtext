@@ -1,0 +1,9 @@
+grammar org.xtext.ceu.Ceu with org.eclipse.xtext.common.Terminals
+
+generate ceu "http://www.xtext.org/ceu/Ceu"
+
+Model:
+	greetings+=Greeting*;
+	
+Greeting:
+	'Hello' name=ID '!';
