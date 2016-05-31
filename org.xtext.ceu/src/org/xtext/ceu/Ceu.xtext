@@ -560,20 +560,22 @@ terminal HEX:		//Used in Rule: Number
 /*								PreProcessor 								*/
 /*------------------------------------------------------------------------- */
 PreProc:
-    type=PREPROCESSOR_INCLUDE_TYPE val=(STRING)| 
+    type=PREPROCESSOR_INCLUDE_TYPE | 
     type=PREPROCESSOR_DEFINE_TYPE | 
-    type=PREPROCESSOR_SINGLE_PARAM_TYPE val=ID|
-    type=PREPROCESSOR_NONE_PARAM_TYPE
+    type=PREPROCESSOR_SINGLE_PARAM_TYPE
 ;
 
-terminal PREPROCESSOR_INCLUDE_TYPE: '#include'| '#import';
-
-//terminal PREPROCESSOR_INCLUDE_VAL: ' '+ '<'->'>';
+terminal PREPROCESSOR_INCLUDE_TYPE: 
+		'#include'	->	'\n'
+	| 	'#import'	->	'\n'
+;
 
 terminal PREPROCESSOR_DEFINE_TYPE: '#define' -> '\n';
 
-terminal PREPROCESSOR_SINGLE_PARAM_TYPE: '#undef' |'#ifdef' |'#ifndef' |'#pragma';
-
-terminal PREPROCESSOR_NONE_PARAM_TYPE: '#else' | '#endif';
+terminal PREPROCESSOR_SINGLE_PARAM_TYPE: 
+		'#undef'->'\n'
+	|	('#ifdef'|'#ifndef') -> '#endif' 
+	|	'#pragma'->'\n'
+;
 
 /*------------------------------------------------------------------------- */
