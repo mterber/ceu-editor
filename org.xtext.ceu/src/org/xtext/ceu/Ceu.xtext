@@ -444,7 +444,7 @@ Exp11:
 		'(' expList+=ExpList ')' 
 		('finalize' 'with' finally+=Finally 'end' )?
 		|	'[' exp+=Exp ']' 
-		|	(':' | '.') field+=ID_FIELD
+		|	(':' | '.') field+=(ID_VAR | ID_NAT | ID_CLS_ADT)
 		|	'?'
 		|	'!'
 	)*
@@ -552,15 +552,13 @@ terminal ID_CLS_ADT:
 terminal ID_NAT:
 	'_' ('a'..'z' | 'A'..'Z' | '0'..'9' | '_')+
 ;
-terminal ID_FIELD:
-	('a'..'z' | 'A'..'Z' | '_') 
-	('a'..'z' | 'A'..'Z' | '_' | '0'..'9')*
-;
+//terminal ID_FIELD:
+//	('a'..'z' | 'A'..'Z' | '_') 
+//	('a'..'z' | 'A'..'Z' | '_' | '0'..'9')*
+//;
 terminal HEX:		//Used in Rule: Number
 	('0' ('x'|'X') ('0'..'9'|'A'..'F'|'a'..'f')*)
 ;
-
-
 
 /*------------------------------------------------------------------------- */
 /*								PreProcessor 								*/
