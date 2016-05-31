@@ -360,7 +360,12 @@ Raw:
 /*								Types										*/
 /*------------------------------------------------------------------------- */
 Type:
-	(type_cls=[Dcl_cls|ID_CLS_ADT] | type_prim=Types) 
+	(		
+			type_prim=Types 
+		|	type_cls_adt=ID_CLS_ADT			//combines types ID_cls and ID_adt
+		|	type_nat=ID_NAT
+//		| 	type_adt=[Dcl_adt|ID_CLS_ADT]
+	) 
 	('&' | '&&' | '?' | '[' (exp+=Exp)? ']')*
 ;
 /*------------------------------------------------------------------------- */
@@ -434,7 +439,8 @@ Exp10:
 	expr=Exp11
 ;
 Exp11:
-	left=Exp12 (
+	left=Exp12 
+	(
 		'(' expList+=ExpList ')' 
 		('finalize' 'with' finally+=Finally 'end' )?
 		|	'[' exp+=Exp ']' 
