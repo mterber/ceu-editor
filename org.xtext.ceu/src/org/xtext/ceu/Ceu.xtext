@@ -364,7 +364,6 @@ Type:
 			type_prim=Types 
 		|	type_cls_adt=ID_CLS_ADT			//combines types ID_cls and ID_adt
 		|	type_nat=ID_NAT
-//		| 	type_adt=[Dcl_adt|ID_CLS_ADT]
 	) 
 	('&' | '&&' | '?' | '[' (exp+=Exp)? ']')*
 ;
@@ -435,7 +434,7 @@ Exp9:
 	left=Exp10 ( ( ('*' | '/') | '%') right+=Exp10)*
 ;
 Exp10:
-	('not' | '-' | '+' | '~' | '*' | '&&' | '&' | '$$' | '$' | '(' cast+=Cast ')' )*
+	('not' | '-' | '+' | '~' | '*' | '&&' | '&' | '$$' | '$' | '(' cast+=Cast ')')*
 	expr=Exp11
 ;
 Exp11:
@@ -502,7 +501,7 @@ LstStmtB:
 StmtS:
 		Nothing 
 	| 	Dcl_var		| 	Dcl_pool | 	Dcl_int
-	// 	Dcl_fun => Dcl_fun_do || Dcl_ext0 => Dcl_ext1 	in 	StmtB
+	// 	Dcl_fun => Dcl_fun_do & Dcl_ext0 => Dcl_ext1 	>> in StmtB
 	|	Dcl_nat		| 	Dcl_det
 	|	=>Set
 	|	Await		| 	Emit	//	<= Emit includes EmitExt & EmitInt
@@ -552,10 +551,6 @@ terminal ID_CLS_ADT:
 terminal ID_NAT:
 	'_' ('a'..'z' | 'A'..'Z' | '0'..'9' | '_')+
 ;
-//terminal ID_FIELD:
-//	('a'..'z' | 'A'..'Z' | '_') 
-//	('a'..'z' | 'A'..'Z' | '_' | '0'..'9')*
-//;
 terminal HEX:		//Used in Rule: Number
 	('0' ('x'|'X') ('0'..'9'|'A'..'F'|'a'..'f')*)
 ;
