@@ -142,8 +142,19 @@ Dcl_nat:
 Dcl_nat2:
 		name=ID_NAT ('=' INT | '()')?
 ;
-terminal HOST:
-	('native/pre' | 'native') 'do' -> 'end'
+Host_c:
+	('native' | 'native/pre') 'do' b=BlockC 'end'
+;
+
+BlockC:
+	(ID | INT | STRING | ANY_OTHER)*
+;
+
+C_Types:
+		'bool' 	| 	'byte' 	| 	'char'	|	'f32'	|	'f64'   
+	|	'float' | 	'int'   | 	's16'   | 	's32'   | 	's64'   
+	| 	's8'    | 	'u16' 	| 	'u32'   | 	'u64'   | 	'u8'    
+	|	'uint'	| 	'void'  | 	'word'
 ;
 Dcl_det:
 	'@safe' name+=ID_det 
@@ -174,7 +185,7 @@ Sets:											//TODO
 	)
 ;
 SetBlock:
-	Do | If  | Loop | Every | ParEver
+	Do | If  | Loop | Every | Par
 ;
 
 Adt_constr_root:
@@ -308,20 +319,8 @@ Finalize:
 Finally:
 	Block
 ;
-ParOr:
-	'par/or' 'do' 
-		block+=Block 
-		('with' block+=Block)+
-	'end'
-;
-ParAnd:
-	'par/and' 'do' 
-		block+=Block 
-		('with' block+=Block)+
-	'end'
-;
-ParEver:
-	'par' 'do' 
+Par:
+	('par'|'par/and'|'par/or') 'do' 
 		block+=Block 
 		('with' block+=Block)+
 	'end'
@@ -496,7 +495,7 @@ LstStmt:
 	Escape | Return | Break | Continue
 ;
 LstStmtB:
-	ParEver
+	Par
 ;
 StmtS:
 		Nothing 
@@ -519,16 +518,12 @@ StmtB:											//TODO
 	|	Loop	|	Every	|	Traverse	//Traverse includes -Loop/-Rec
 	|	Spawn
 	|	Finalize
-	|	ParOr	|	ParAnd	|	Watching
+	|	Watching
 	|	Pause
 	|	Async	|	Thread	|	Isr		|	Atomic
 	|	DoPre
 	//|	LuaStmt
 	|	PreProc
-;
-
-Host_c:
-	name=HOST
 ;
 
 Types:
