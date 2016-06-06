@@ -233,11 +233,11 @@ Await:
 	'await' (awaits=Awaits ('until' exp=Exp)? | {AwaitN} 'FOREVER')
 ;
 Awaits:
-	=>wclock=WCLOCK | name=ID_EXT_TAG | exp=Exp
+	=>(=>wclockk=WCLOCKK | wclocke=WCLOCKE) | name=ID_EXT_TAG | exp=Exp
 ;
 Emit:
-	( 	('call/rec'|'call'|'request') wclk=WCLOCK ) 
-	| 	('emit' (	=>wclk=WCLOCK 
+	( 	('call/rec'|'call'|'request') (=>wclockk=WCLOCKK | wclocke=WCLOCKE) ) 
+	| 	('emit' (	=>(=>wclockk=WCLOCKK | wclocke=WCLOCKE) 
 				| 	exp=Exp emit=Emit_ps))
 	|	(name=ID_EXT_TAG (emit=Emit_ps)? )
 ;
@@ -396,8 +396,11 @@ TupleType_2:
 /*------------------------------------------------------------------------- */
 /*							Wall-clock values								*/
 /*------------------------------------------------------------------------- */
+WCLOCKK:
+	(INT 'h')? (INT 'min')? (INT 's')? (INT 'ms')? (INT 'us')? ('_')?
+;
 
-WCLOCK:
+WCLOCKE:
 	exp=Exp ('h' | 'min' | 's' | 'ms' | 'us') ('_')?
 ;
 
