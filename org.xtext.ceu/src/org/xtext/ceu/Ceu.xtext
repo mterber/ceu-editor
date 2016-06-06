@@ -1,3 +1,9 @@
+/**
+ * Ceu-grammar version:
+ * https://github.com/fsantanna/ceu/commit/b37bca095bd7f079f20d13068e298a5dc8b5946d
+ * 
+ */
+
 grammar org.xtext.ceu.Ceu with org.eclipse.xtext.common.Terminals
 
 generate ceu "http://www.xtext.org/ceu/Ceu"
