@@ -379,7 +379,7 @@ VarList:
 	'(' name+=ID_VAR (',' name+=ID_VAR)* ')'
 ;
 ExpList:
-	exp+=Exp (',' exp+=Exp)*
+	{ExpList} ( exp+=Exp (',' exp+=Exp)* )?
 ;
 TupleTypeItem_1:
 	Type
