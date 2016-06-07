@@ -448,8 +448,12 @@ Exp10:
 Exp11:
 	left=Exp12 
 	(
-		'(' expList+=ExpList ')' 
-		('finalize' 'with' finally+=Finally 'end' )?
+		(
+			'()' |	//	Workaround for empty round brackets Issue (#25)
+					//	consider for possibly occuring problems later..
+			'(' expList+=ExpList ')' 
+			('finalize' 'with' finally+=Finally 'end' )?
+		)
 		|	'[' exp+=Exp ']' 
 		|	(':' | '.') field+=(ID_VAR | ID_NAT | ID_CLS_ADT)
 		|	'?'
