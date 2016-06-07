@@ -211,10 +211,10 @@ Adt_explist:
 ;
 
 Vector_tup:
-	'[' ExpList ']'
+	'[' e=ExpList ']'
 ;
 Vector_constr:
-	vec+= Vector_tup ('..' (vec+=Vector_tup) )*
+	(vec+=Vector_tup) ('..' (vec+=Vector_tup | exp+=Exp) )*
 ;
 
 /*------------------------------------------------------------------------- */
@@ -470,8 +470,8 @@ Prim:
 	|	Null		|	Number	|	{String} STRING
 	|	Global 		|	This	|	Outer
 	|	=>RawStmt	|	=>Vector_constr
-	//|	'call' Exp
-	//|	'call/rec' Exp
+	|	'call' Exp
+	|	'call/rec' Exp
 ;
 Cast:
 	type=Type | cast=('@nohold' | '@plain' | '@pure')
