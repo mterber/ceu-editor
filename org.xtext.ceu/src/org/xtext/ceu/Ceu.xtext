@@ -582,3 +582,7 @@ terminal PREPROCESSOR_SINGLE_PARAM_TYPE:
 ;
 
 /*------------------------------------------------------------------------- */
+
+terminal UNUSED:
+	'par' '/'
+;
