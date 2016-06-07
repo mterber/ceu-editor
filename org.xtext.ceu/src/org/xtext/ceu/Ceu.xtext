@@ -543,7 +543,12 @@ Types:
 	|	'uint'	| 	'void'  | 	'word'
 	)
 ;
-terminal ID_VAR:
+
+ID_VAR:
+	ID_VAR_TERMINAL | 'h' | 'min' | 's' | 'ms' | 'us'
+;
+
+terminal ID_VAR_TERMINAL:
 	(('a'..'z') ('a'..'z' | 'A'..'Z' | '0'..'9' | '_')*) | '_'
 ;
 terminal ID_EXT_TAG:
