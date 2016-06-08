@@ -153,7 +153,12 @@ Host_c:
 ;
 
 BlockC:
-	(ID | INT | STRING | ANY_OTHER)*
+	(ID | ID_VAR | ID_EXT_TAG | ID_NAT | ID_CLS_ADT | INT | STRING | ANY_OTHER | C_Types 
+	| '(' | ')' | '[' | ']' | '{' | '}' | '()' //| '[]' | '{}'
+	| PREPROCESSOR_DEFINE_TYPE | PREPROCESSOR_INCLUDE_TYPE | PREPROCESSOR_SINGLE_PARAM_TYPE
+	| '=' | '==' | '<' | '<=' | '>' | '>=' | '>>' | '<<' | ',' | '.'
+	| '+' | '-' | '/' | '*' | ';'
+	)*
 ;
 
 C_Types:
@@ -161,6 +166,13 @@ C_Types:
 	|	'float' | 	'int'   | 	's16'   | 	's32'   | 	's64'   
 	| 	's8'    | 	'u16' 	| 	'u32'   | 	'u64'   | 	'u8'    
 	|	'uint'	| 	'void'  | 	'word'
+	// C Keywords
+	|	 'auto'	|	'break'	|	'case'	|	'const'
+	|	'continue' | 'default' | 'do' | 'double' | 'else' | 'enum' | 'extern'
+	| 	'for' | 'goto' | 'if' | 'long' | 'register'
+	|	'return' | 'short' | 'signed' | 'sizeof' | 'static' | 'struct'
+	|	'switch' | 'typedef' | 'union' | 'unsigned' | 'volatile'
+	|	'while'
 ;
 Dcl_det:
 	'@safe' name+=ID_det 
