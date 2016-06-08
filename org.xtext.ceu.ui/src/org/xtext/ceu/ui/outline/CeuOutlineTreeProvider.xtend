@@ -22,9 +22,7 @@ import org.xtext.ceu.ceu.Every
 import org.xtext.ceu.ceu.Traverse
 import org.xtext.ceu.ceu.Spawn
 import org.xtext.ceu.ceu.Finalize
-import org.xtext.ceu.ceu.ParOr
-import org.xtext.ceu.ceu.ParAnd
-import org.xtext.ceu.ceu.ParEver
+import org.xtext.ceu.ceu.Par
 import org.xtext.ceu.ceu.Pause
 import org.xtext.ceu.ceu.Async
 import org.xtext.ceu.ceu.Isr
@@ -78,13 +76,7 @@ class CeuOutlineTreeProvider extends DefaultOutlineTreeProvider {
 			createNode(parentNode, element)
 		}
 	}
-	def dispatch boolean isLeaf(ParOr p) {
-		return true;
-	}
-	def dispatch boolean isLeaf(ParAnd p) {
-		return true;
-	}	
-	def dispatch boolean isLeaf(ParEver p) {
+	def dispatch boolean isLeaf(Par p) {
 		return true;
 	}
 	def dispatch void createChildren(DocumentRootNode parentNode, Dcl_cls c) {
