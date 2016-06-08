@@ -466,7 +466,7 @@ Exp12:
 Prim: 
 	'(' exp=Exp ')'
 	|	Sizeof
-	|	var=ID_VAR
+	|	var=ID_VAR	|	nat=ID_NAT
 	|	Null		|	Number	|	{String} STRING
 	|	Global 		|	This	|	Outer
 	|	=>RawStmt	|	=>Vector_constr
