@@ -154,17 +154,18 @@ Host_c:
 
 BlockC:
 	(ID | ID_VAR | ID_EXT_TAG | ID_NAT | ID_CLS_ADT | INT | STRING | ANY_OTHER | C_Types 
-	| '(' | ')' | '[' | ']' | '{' | '}' | '()'
+	| '(' | ')' | '[' | ']' | '{' | '}' | '()' | '_'
 	| PREPROCESSOR_DEFINE_TYPE | PREPROCESSOR_INCLUDE_TYPE | PREPROCESSOR_SINGLE_PARAM_TYPE
 	| '=' | '==' | '<' | '<=' | '>' | '>=' | '>>' | '<<' | ',' | '.'
 	| '+' | '-' | '/' | '*' | ';' | '%' | '$' | '?' | '!'
+	| '&' | '|' | '^'
 	)*
 ;
 
 C_Types:
 		'bool' 	| 	'byte' 	| 	'char'	|	'f32'	|	'f64'   
 	|	'float' | 	'int'   | 	's16'   | 	's32'   | 	's64'   
-	| 	's8'    | 	'u16' 	| 	'u32'   | 	'u64'   | 	'u8'    
+	| 	's8'    | 	'u16' 	| 	'u32'   | 	'u64'   | 	'u8'
 	|	'uint'	| 	'void'  | 	'word'
 	// C Keywords
 	|	 'auto'	|	'break'	|	'case'	|	'const'
@@ -209,10 +210,11 @@ Lua:
 
 LuaBlock:
 	(ID | ID_VAR | ID_EXT_TAG | ID_NAT | ID_CLS_ADT | INT | STRING | ANY_OTHER | Lua_Keys 
-	| '(' | ')' | '[' | ']' | '{' | '}' | '()'
+	| '(' | ')' | '[' | ']' | '{' | '}' | '()' | '_'
 	| '=' | '=='| '~='| '<' | '<='| '>' | '>=' | '>>' | '<<' | ',' | '.' | '..' | '...'
 	| '+' | '-' | '/' | '*' | ';'
 	| '#' | '^' | ':' | '%'	| '!' | '$'
+	| '&' | '|'
 	)*
 ;
 
@@ -271,10 +273,10 @@ Emit:
 	( 	('call/rec'|'call'|'request') (=>wclockk=WCLOCKK | wclocke=WCLOCKE) ) 
 	| 	('emit' (	=>(=>wclockk=WCLOCKK | wclocke=WCLOCKE) 
 				| 	exp=Exp emit=Emit_ps))
-	|	(name=ID_EXT_TAG (emit=Emit_ps)? )
+	|	(name=ID_EXT_TAG emit=Emit_ps )
 ;
 Emit_ps:
-	'=>' (exp=Exp | =>'(' explist=ExpList ')')
+	{Emit_ps} ('=>' (exp=Exp | =>'(' explist=ExpList ')') )?
 ;
 /*------------------------------------------------------------------------- */
 /*							Organism instantiation							*/
@@ -498,7 +500,7 @@ Exp12:
 Prim: 
 	'(' exp=Exp ')'
 	|	Sizeof
-	|	var=ID_VAR	|	nat=ID_NAT
+	|	var=ID_VAR	|	nat=ID_NAT	|	def=ID_EXT_TAG
 	|	Null		|	Number	|	{String} STRING
 	|	Global 		|	This	|	Outer
 	|	=>RawStmt	|	=>Vector_constr
@@ -515,7 +517,7 @@ Null:
 	{Null} 'null'
 ;
 Number:
-	{Number} ( =>(INT ('.' INT)?) | HEX )
+	{Number} ( =>(INT ('.' INT)?) | HEX  | 'true' | 'false' )
 ;
 Global:
 	{Global} 'global'
@@ -617,8 +619,9 @@ terminal PREPROCESSOR_DEFINE_TYPE: '#define' -> '\n';
 
 terminal PREPROCESSOR_SINGLE_PARAM_TYPE: 
 		'#undef'->'\n'
-	|	('#ifdef'|'#ifndef') -> '#endif' 
+	|	('#ifdef'|'#ifndef') -> '\n' 
 	|	'#pragma'->'\n'
+	|	'#endif'
 ;
 
 /*------------------------------------------------------------------------- */
