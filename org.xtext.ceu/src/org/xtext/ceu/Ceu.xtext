@@ -625,7 +625,7 @@ terminal PREPROCESSOR_SINGLE_PARAM_TYPE:
 ;
 
 /*------------------------------------------------------------------------- */
-
+// this was added to fix highlighting problems with par | par/or | par/and
 terminal UNUSED:
 	'par' '/'
 ;
