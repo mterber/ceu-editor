@@ -498,7 +498,7 @@ Exp12:
 	Prim
 ;
 Prim: 
-	'(' exp=Exp ')'
+	'(' exp+=Exp ')'
 	|	Sizeof
 	|	var=ID_VAR	|	nat=ID_NAT	|	def=ID_EXT_TAG
 	|	Null		|	Number	|	{String} STRING
