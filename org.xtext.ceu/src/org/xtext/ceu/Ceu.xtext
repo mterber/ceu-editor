@@ -153,14 +153,27 @@ Host_c:
 ;
 
 BlockC:
-	(ID | INT | STRING | ANY_OTHER)*
+	(ID | ID_VAR | ID_EXT_TAG | ID_NAT | ID_CLS_ADT | INT | STRING | ANY_OTHER | C_Types 
+	| '(' | ')' | '[' | ']' | '{' | '}' | '()' | '_'
+	| PREPROCESSOR_DEFINE_TYPE | PREPROCESSOR_INCLUDE_TYPE | PREPROCESSOR_SINGLE_PARAM_TYPE
+	| '=' | '==' | '<' | '<=' | '>' | '>=' | '>>' | '<<' | ',' | '.'
+	| '+' | '-' | '/' | '*' | ';' | '%' | '$' | '?' | '!'
+	| '&' | '|' | '^'
+	)*
 ;
 
 C_Types:
 		'bool' 	| 	'byte' 	| 	'char'	|	'f32'	|	'f64'   
 	|	'float' | 	'int'   | 	's16'   | 	's32'   | 	's64'   
-	| 	's8'    | 	'u16' 	| 	'u32'   | 	'u64'   | 	'u8'    
+	| 	's8'    | 	'u16' 	| 	'u32'   | 	'u64'   | 	'u8'
 	|	'uint'	| 	'void'  | 	'word'
+	// C Keywords
+	|	 'auto'	|	'break'	|	'case'	|	'const'
+	|	'continue' | 'default' | 'do' | 'double' | 'else' | 'enum' | 'extern'
+	| 	'for' | 'goto' | 'if' | 'long' | 'register'
+	|	'return' | 'short' | 'signed' | 'sizeof' | 'static' | 'struct'
+	|	'switch' | 'typedef' | 'union' | 'unsigned' | 'volatile'
+	|	'while'
 ;
 Dcl_det:
 	'@safe' name+=ID_det 
@@ -176,19 +189,40 @@ ID_det:
 Set:
 	(exp=Exp | =>varlist=VarList) sets=Sets
 ;
-Sets:											//TODO
+Sets:
 	('=' | ':=')
 	(	SetBlock 
 	| 	Await
 	|	Emit
 	|	Adt_constr_root
-	//|	LuaExp
+	|	Lua
 	|	=>DoOrg
 	|	Spawn
 	|	Thread
 	|	=>Exp
 	|	Traverse
 	)
+;
+
+Lua:
+	'[[' lua=LuaBlock ']]'
+;
+
+LuaBlock:
+	(ID | ID_VAR | ID_EXT_TAG | ID_NAT | ID_CLS_ADT | INT | STRING | ANY_OTHER | Lua_Keys 
+	| '(' | ')' | '[' | ']' | '{' | '}' | '()' | '_'
+	| '=' | '=='| '~='| '<' | '<='| '>' | '>=' | '>>' | '<<' | ',' | '.' | '..' | '...'
+	| '+' | '-' | '/' | '*' | ';'
+	| '#' | '^' | ':' | '%'	| '!' | '$'
+	| '&' | '|'
+	)*
+;
+
+Lua_Keys:
+		'and' | 'break' | 'do' 	| 'else' 	| 'elseif' 
+	| 	'end' | 'false' | 'for' | 'function'| 'if' 
+	|	'in'  |	'local'	| 'nil' | 'not' 	| 'or'
+	|	'repeat'	| 'return'	| 'then'	| 'true' | 'until' | 'while'
 ;
 SetBlock:
 	Do | If  | Loop | Every | Par
@@ -239,10 +273,10 @@ Emit:
 	( 	('call/rec'|'call'|'request') (=>wclockk=WCLOCKK | wclocke=WCLOCKE) ) 
 	| 	('emit' (	=>(=>wclockk=WCLOCKK | wclocke=WCLOCKE) 
 				| 	exp=Exp emit=Emit_ps))
-	|	(name=ID_EXT_TAG (emit=Emit_ps)? )
+	|	(name=ID_EXT_TAG emit=Emit_ps )
 ;
 Emit_ps:
-	'=>' (exp=Exp | =>'(' explist=ExpList ')')
+	{Emit_ps} ('=>' (exp=Exp | =>'(' explist=ExpList ')') )?
 ;
 /*------------------------------------------------------------------------- */
 /*							Organism instantiation							*/
@@ -466,7 +500,7 @@ Exp12:
 Prim: 
 	'(' exp=Exp ')'
 	|	Sizeof
-	|	var=ID_VAR	|	nat=ID_NAT
+	|	var=ID_VAR	|	nat=ID_NAT	|	def=ID_EXT_TAG
 	|	Null		|	Number	|	{String} STRING
 	|	Global 		|	This	|	Outer
 	|	=>RawStmt	|	=>Vector_constr
@@ -483,7 +517,7 @@ Null:
 	{Null} 'null'
 ;
 Number:
-	{Number} ( =>(INT ('.' INT)?) | HEX )
+	{Number} ( =>(INT ('.' INT)?) | HEX  | 'true' | 'false' )
 ;
 Global:
 	{Global} 'global'
@@ -498,10 +532,9 @@ Outer:
 /*------------------------------------------------------------------------- */
 /*								Statements	 								*/
 /*------------------------------------------------------------------------- */
-Stmt:											//TODO
+Stmt:
 		(StmtS ';' | StmtB)
 	| 	(LstStmt ';' | LstStmtB)
-	//|	Host 
 ;
 
 LstStmt:
@@ -523,7 +556,7 @@ StmtS:
 	|	=>RawStmt
 	| 	CallStmt
 ;
-StmtB:											//TODO
+StmtB:
 		Dcl_fun_do 			|	Dcl_ext1
 	|	Dcl_ifc	|	Dcl_cls	|	Dcl_adt
 	|	Host_c
@@ -535,7 +568,7 @@ StmtB:											//TODO
 	|	Pause
 	|	Async	|	Thread	|	Isr		|	Atomic
 	|	DoPre
-	//|	LuaStmt
+	|	Lua
 	|	PreProc
 ;
 
@@ -586,12 +619,13 @@ terminal PREPROCESSOR_DEFINE_TYPE: '#define' -> '\n';
 
 terminal PREPROCESSOR_SINGLE_PARAM_TYPE: 
 		'#undef'->'\n'
-	|	('#ifdef'|'#ifndef') -> '#endif' 
+	|	('#ifdef'|'#ifndef') -> '\n' 
 	|	'#pragma'->'\n'
+	|	'#endif'
 ;
 
 /*------------------------------------------------------------------------- */
-
+// this was added to fix highlighting problems with par | par/or | par/and
 terminal UNUSED:
 	'par' '/'
 ;
