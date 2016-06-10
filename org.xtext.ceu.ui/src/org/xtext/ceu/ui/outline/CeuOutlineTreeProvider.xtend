@@ -4,6 +4,89 @@
 package org.xtext.ceu.ui.outline
 
 import org.eclipse.xtext.ui.editor.outline.impl.DefaultOutlineTreeProvider
+import org.eclipse.xtext.ui.editor.outline.impl.DocumentRootNode
+import org.xtext.ceu.ceu.Root
+import org.eclipse.xtext.ui.editor.outline.IOutlineNode
+import org.xtext.ceu.ceu.Nothing
+import org.xtext.ceu.ceu.Set
+import org.xtext.ceu.ceu.Await
+import org.xtext.ceu.ceu.Emit
+import org.xtext.ceu.ceu.Kill
+import org.xtext.ceu.ceu.RawStmt
+import org.xtext.ceu.ceu.CallStmt
+import org.xtext.ceu.ceu.Host_c
+import org.xtext.ceu.ceu.Do
+import org.xtext.ceu.ceu.If
+import org.xtext.ceu.ceu.Loop
+import org.xtext.ceu.ceu.Every
+import org.xtext.ceu.ceu.Traverse
+import org.xtext.ceu.ceu.Spawn
+import org.xtext.ceu.ceu.Finalize
+import org.xtext.ceu.ceu.Par
+import org.xtext.ceu.ceu.Pause
+import org.xtext.ceu.ceu.Async
+import org.xtext.ceu.ceu.Isr
+import org.xtext.ceu.ceu.Atomic
+import org.xtext.ceu.ceu.DoPre
+import org.xtext.ceu.ceu.PreProc
+import org.xtext.ceu.ceu.Escape
+import org.xtext.ceu.ceu.Return
+import org.xtext.ceu.ceu.Break
+import org.xtext.ceu.ceu.Continue
+import org.xtext.ceu.ceu.Block
+import org.xtext.ceu.ceu.Sets
+import org.xtext.ceu.ceu.Dcl_cls
+import org.xtext.ceu.ceu.Dcl_var
+import org.xtext.ceu.ceu.BlockI
+import org.xtext.ceu.ceu.Dcl_pool
+import org.xtext.ceu.ceu.Dcl_imp
+import org.xtext.ceu.ceu.Dcl_int
+import org.xtext.ceu.ceu.Dcl_fun
+import org.xtext.ceu.ceu.Exp
+import org.eclipse.emf.edit.command.CreateChildCommand.Helper
+import org.xtext.ceu.ceu.Stmt
+import org.xtext.ceu.ceu.StmtB
+import org.xtext.ceu.ceu.LstStmt
+import org.xtext.ceu.ceu.LstStmtB
+import org.xtext.ceu.ceu.Type
+import org.xtext.ceu.ceu.Dcl_var_org
+import org.xtext.ceu.ceu.Dcl_var_plain
+import org.xtext.ceu.ceu.Dcl_var_set
+import org.xtext.ceu.ceu.Var_constr
+import org.xtext.ceu.ceu.Dcl_var_plain_set
+import org.xtext.ceu.ceu.Awaits
+import org.xtext.ceu.ceu.TupleType_1
+import org.xtext.ceu.ceu.TupleType_2
+import org.xtext.ceu.ceu.Dcl_fun_do
+import org.xtext.ceu.services.CeuGrammarAccess.PreProcElements
+import org.xtext.ceu.ceu.Dcl_adt
+import org.xtext.ceu.ceu.Dcl_adt_struct
+import org.xtext.ceu.ceu.Types
+import org.eclipse.emf.ecore.EObject
+import org.eclipse.xtext.ui.editor.outline.impl.EObjectNode
+import org.xtext.ceu.ceu.Prim
+import org.xtext.ceu.ceu.ExpList
+import org.xtext.ceu.ceu.Exp0
+import org.xtext.ceu.ceu.Exp1
+import org.xtext.ceu.ceu.Exp2
+import org.xtext.ceu.ceu.Exp12
+import org.xtext.ceu.ceu.Exp11
+import org.xtext.ceu.ceu.Exp10
+import org.xtext.ceu.ceu.Exp9
+import org.xtext.ceu.ceu.Exp8
+import org.xtext.ceu.ceu.Exp7
+import org.xtext.ceu.ceu.Exp6
+import org.xtext.ceu.ceu.Exp5
+import org.xtext.ceu.ceu.Exp4
+import org.xtext.ceu.ceu.Exp3
+import org.xtext.ceu.ceu.Lua
+import org.xtext.ceu.services.CeuGrammarAccess.BlockCElements
+import org.xtext.ceu.ceu.Dcl_nat
+import org.xtext.ceu.ceu.Dcl_nat2
+import org.xtext.ceu.ceu.Dcl_ext1
+import org.xtext.ceu.services.CeuGrammarAccess.LuaBlockElements
+import org.xtext.ceu.ceu.StmtS
+import javax.print.attribute.standard.DocumentName
 
 /**
  * Customization of the default outline structure.
@@ -11,5 +94,140 @@ import org.eclipse.xtext.ui.editor.outline.impl.DefaultOutlineTreeProvider
  * See https://www.eclipse.org/Xtext/documentation/304_ide_concepts.html#outline
  */
 class CeuOutlineTreeProvider extends DefaultOutlineTreeProvider {
-
+	
+////	---------------------- avoiding outlineNodes ----------------------
+//	
+//	def dispatch void createChildren(DocumentRootNode parentNode, Root r) {
+//		for(statement : r.stmt) {
+//			createChildren(parentNode, statement)
+//		}
+//	}
+//	def dispatch void createChildren(DocumentRootNode parentNode, Block b) {
+//	}
+//	def dispatch void createChildren(DocumentRootNode parentNode, BlockI b) {
+//		for(element : b.dcl_imp) {
+//			createNode(parentNode, element)
+//		}
+//		for(element : b.dcl_int) {
+//			createNode(parentNode, element)
+//		}
+//		for(element : b.dcl_var) {
+//			createNode(parentNode, element)
+//		}
+//	}
+//	def dispatch void createChildren(DocumentRootNode parentNode, Dcl_cls c) {
+//		createNode(parentNode, c.blockI)
+//		println("\n\n>>>>>>>>>>>\n dies ist ein test \n<<<<<<<<<<<<\n\n")
+//	}
+//	
+	/*		StmtS		*/
+	def dispatch void createNode(IOutlineNode parentNode, Nothing n) { }
+	def dispatch void createNode(IOutlineNode parentNode, Set s) { }
+	def dispatch void createNode(IOutlineNode parentNode, Sets s) { }
+	def dispatch void createNode(IOutlineNode parentNode, Await a) { }
+	def dispatch void createNode(IOutlineNode parentNode, Awaits a) { }
+	def dispatch void createNode(IOutlineNode parentNode, Emit e) { }
+	def dispatch void createNode(IOutlineNode parentNode, Kill k) { }
+	def dispatch void createNode(IOutlineNode parentNode, RawStmt r) { }
+	def dispatch void createNode(IOutlineNode parentNode, CallStmt c) { }
+	def dispatch void createNode(IOutlineNode parentNode, ExpList c) { }
+	def dispatch void createNode(IOutlineNode parentNode, Exp c) { }
+	def dispatch void createNode(IOutlineNode parentNode, Exp0 c) { }
+	def dispatch void createNode(IOutlineNode parentNode, Exp1 c) { }
+	def dispatch void createNode(IOutlineNode parentNode, Exp2 c) { }
+	def dispatch void createNode(IOutlineNode parentNode, Exp3 c) { }
+	def dispatch void createNode(IOutlineNode parentNode, Exp4 c) { }
+	def dispatch void createNode(IOutlineNode parentNode, Exp5 c) { }
+	def dispatch void createNode(IOutlineNode parentNode, Exp6 c) { }
+	def dispatch void createNode(IOutlineNode parentNode, Exp7 c) { }
+	def dispatch void createNode(IOutlineNode parentNode, Exp8 c) { }
+	def dispatch void createNode(IOutlineNode parentNode, Exp9 c) { }
+	def dispatch void createNode(IOutlineNode parentNode, Exp10 c) { }
+	def dispatch void createNode(IOutlineNode parentNode, Exp11 c) { }
+	def dispatch void createNode(IOutlineNode parentNode, Exp12 c) { }
+	/*		StmtB		*/
+	def dispatch void createNode(IOutlineNode parentNode, Host_c h) { }
+	
+	def dispatch void createNode(IOutlineNode parentNode, Do d) { }
+	def dispatch void createNode(IOutlineNode parentNode, If i) { }
+	def dispatch void createNode(IOutlineNode parentNode, Loop l) { }
+	def dispatch void createNode(IOutlineNode parentNode, Every e) { }
+	def dispatch void createNode(IOutlineNode parentNode, Traverse t) { }
+	def dispatch void createNode(IOutlineNode parentNode, Spawn s) { }
+	def dispatch void createNode(IOutlineNode parentNode, Finalize f) { }
+	def dispatch void createNode(IOutlineNode parentNode, Pause p) { }
+	def dispatch void createNode(IOutlineNode parentNode, Async a) { }
+	def dispatch void createNode(IOutlineNode parentNode, org.xtext.ceu.ceu.Thread t) { }
+	def dispatch void createNode(IOutlineNode parentNode, Isr i) { }
+	def dispatch void createNode(IOutlineNode parentNode, Atomic a) { }
+	def dispatch void createNode(IOutlineNode parentNode, DoPre d) { }
+	def dispatch void createNode(IOutlineNode parentNode, PreProc p) { }
+	/*		LstStmtB		*/
+	def dispatch void createNode(IOutlineNode parentNode, Par p) { }
+	/*		LstStmt			*/
+	def dispatch void createNode(IOutlineNode parentNode, Escape e) { }
+	def dispatch void createNode(IOutlineNode parentNode, Return r) { }
+	def dispatch void createNode(IOutlineNode parentNode, Break b) { }
+	def dispatch void createNode(IOutlineNode parentNode, Continue c) { }
+	
+	def dispatch void createNode(IOutlineNode parentNode, Type t) { }
+	def dispatch void createNode(IOutlineNode parentNode, Dcl_var_org d) { }
+	def dispatch void createNode(IOutlineNode parentNode, Dcl_var_set d) { }
+	def dispatch void createNode(IOutlineNode parentNode, Dcl_var_plain_set d) { }
+	def dispatch void createNode(IOutlineNode parentNode, Var_constr v) { }
+	def dispatch void createNode(IOutlineNode parentNode, TupleType_1 t) { }
+	def dispatch void createNode(IOutlineNode parentNode, TupleType_2 t) { }
+	def dispatch void createNode(IOutlineNode parentNode, Dcl_fun_do d) { }
+	def dispatch void createNode(IOutlineNode parentNode, Dcl_fun d) { }
+	def dispatch void createNode(IOutlineNode parentNode, Dcl_pool d) { }
+	
+	def dispatch void createNode(IOutlineNode parentNode, Prim p) { }
+	def dispatch void createNode(IOutlineNode parentNode, Lua l) { }
+	
+	def dispatch void createNode(IOutlineNode parentNode, Dcl_nat d) { }
+	def dispatch void createNode(IOutlineNode parentNode, Dcl_nat2 d) { }
+	def dispatch void createNode(IOutlineNode parentNode, Block b) { }
+	def dispatch void createNode(IOutlineNode parentNode, BlockI b) { }
+	
+//	def dispatch void createNode(IOutlineNode parentNode, Dcl_cls d) {
+//		for (element : d.blockI.dcl_var) {
+//			createNode(parentNode, element)
+//		}
+//		for (element : d.blockI.dcl_int) {
+//			createNode(parentNode, element)
+//		}
+//		for (element : d.blockI.dcl_imp) {
+//			createNode(parentNode, element)
+//		}
+//	}
+	
+//	---------------------- defining OutlineNodes ----------------------
+	
+	/* Dcl_adt */
+	def dispatch isLeaf(Dcl_adt d) { true }
+	def dispatch Object text(Dcl_adt d) {
+		return '(Data) ' + d.name
+	}
+	
+	/* Dcl_var */
+	def dispatch isLeaf(Dcl_var d) { true }
+	def dispatch Object text(Dcl_var d) {
+		return '(Var) ' + d.name
+	}
+	
+	/* Dcl_cls */
+	def dispatch Object text(Dcl_cls d) {
+		return '(Class) ' + d.name
+	}
+	
+	/* Dcl_ext */
+	def dispatch isLeaf(Dcl_ext1 d) { true }
+	def dispatch Object text(Dcl_ext1 d) {
+		return '(External Event)'
+	}
+	/* Dcl_ext */
+	def dispatch isLeaf(Dcl_int d) { true }
+	def dispatch Object text(Dcl_int d) {
+		return '(Internal Event)'
+	}
 }

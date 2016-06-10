@@ -219,10 +219,10 @@ LuaBlock:
 ;
 
 Lua_Keys:
-		'and' | 'break' | 'do' 	| 'else' 	| 'elseif' 
-	| 	'end' | 'false' | 'for' | 'function'| 'if' 
-	|	'in'  |	'local'	| 'nil' | 'not' 	| 'or'
-	|	'repeat'	| 'return'	| 'then'	| 'true' | 'until' | 'while'
+		'and' 		| 'break' 	| 'do' 	| 'else' 	| 'elseif' 
+	| 	'end' 		| 'false' 	| 'for' | 'function'| 'if' 
+	|	'in'  		|	'local'	| 'nil' | 'not' 	| 'or'
+	|	'repeat'	| 'return'	| 'then'| 'true' 	| 'until' | 'while'
 ;
 SetBlock:
 	Do | If  | Loop | Every | Par
@@ -401,7 +401,7 @@ Raw:
 Type:
 	(		
 			type_prim=Types 
-		|	type_cls_adt=ID_CLS_ADT			//combines types ID_cls and ID_adt
+		|	type_cls_adt=ID_CLS_ADT		//combines types ID_cls and ID_adt
 		|	type_nat=ID_NAT
 	) 
 	('&' | '&&' | '?' | '[' (exp+=Exp)? ']')*
