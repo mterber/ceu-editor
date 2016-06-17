@@ -11,6 +11,11 @@ import org.xtext.ceu.ceu.Root
 import org.xtext.ceu.ceu.Stmt
 import org.xtext.ceu.services.CeuGrammarAccess
 import org.xtext.ceu.ceu.StmtS
+import org.xtext.ceu.ceu.Do
+import org.xtext.ceu.ceu.Block
+import org.xtext.ceu.ceu.Dcl_cls
+import org.xtext.ceu.ceu.BlockI
+import org.eclipse.xtext.resource.XtextResource
 
 class CeuFormatter extends AbstractFormatter2 {
 	
@@ -22,10 +27,32 @@ class CeuFormatter extends AbstractFormatter2 {
 			stmt.format;
 		}
 	}
-
-	def dispatch void format(Escape escape, extension IFormattableDocument document) {
-		// TODO: format HiddenRegions around keywords, attributes, cross references, etc. 
-		escape.getExp.format;
+	def dispatch void format(Do d, extension IFormattableDocument document) {
+		d.block.format
+	}
+	def dispatch void format(Block b, extension IFormattableDocument document) {
+		for (element : b.stmt) {
+			element.format.append[newLine]
+		}
+	}
+	
+	def dispatch void format(Dcl_cls d, extension IFormattableDocument document) {
+		val open = d.regionFor.keyword("with")
+		val mid = d.regionFor.keyword("do")
+		val close = d.regionFor.keyword("end")
+		interior(open, mid)[indent]
+		interior(mid, close)[indent]
+		d.regionFor.keyword(d.name).append[oneSpace].prepend[oneSpace]
+		d.regionFor.keyword("class").append[oneSpace]
+		d.regionFor.keyword("with").append[newLine].prepend[oneSpace]
+		d.blockI.format
+		d.regionFor.keyword("do").append[newLine].prepend[newLine]
+		d.^do.format
+		d.regionFor.keyword("end").append[newLine].prepend[newLine]
+	}
+	def dispatch void format(BlockI b, extension IFormattableDocument document) {
+		
+		b.regionFor.keyword(";").append[newLine].prepend[noSpace]
 	}
 	
 	// TODO: implement for Return, Dcl_var, Dcl_var_org, Dcl_var_plain_set, Var_constr, Dcl_var_set, Dcl_pool, Dcl_int, Dcl_fun, Dcl_fun_do, Dcl_ext_call, Dcl_ext1, Dcl_ext_evt, Dcl_ext_io, Dcl_cls, BlockI, Dcl_ifc, Dcl_adt, Dcl_adt_struct, Dcl_adt_union, Dcl_adt_tag, Dcl_nat, Set, Adt_constr_one, Adt_explist, Vector_tup, Vector_constr, Await, Awaits, Emit, Emit_ps, DoOrg, Spawn, Spawn_constr, Kill, Do, Block, If, Loop, VarList, TraverseLoop, TraverseRec, Finalize, Par, Watching, Pause, Async, Thread, Isr, RawStmt, Raw, Type, ExpList, TupleType_1, TupleTypeItem_2, TupleType_2, WCLOCKE, Exp1, Exp2, Exp3, Exp4, Exp5, Exp6, Exp7, Exp8, Exp9, Exp10, Exp11, Prim, Cast
