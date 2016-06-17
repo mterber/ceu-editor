@@ -37,6 +37,9 @@ Workflow {
 					backtrack = true
 				}
 			}
+			formatter = {
+				generateStub = true
+			}
 		}
 	}
 }
