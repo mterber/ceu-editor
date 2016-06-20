@@ -489,7 +489,7 @@ Exp11:
 			('finalize' 'with' finally+=Finally 'end' )?
 		)
 		|	'[' exp+=Exp ']' 
-		|	(':' | '.') field+=(ID_VAR | ID_NAT | ID_CLS_ADT)
+		|	(':' | '.') field+=(ID_VAR | ID_NAT | ID_CLS_ADT | ID_EXT_TAG )
 		|	'?'
 		|	'!'
 	)*
@@ -500,7 +500,7 @@ Exp12:
 Prim: 
 	'(' exp+=Exp ')'
 	|	Sizeof
-	|	var=ID_VAR	|	nat=ID_NAT	|	def=ID_EXT_TAG
+	|	var=ID_VAR	|	nat=ID_NAT	|	def=ID_EXT_TAG	|	cls=ID_CLS_ADT
 	|	Null		|	Number	|	{String} STRING
 	|	Global 		|	This	|	Outer
 	|	=>RawStmt	|	=>Vector_constr
