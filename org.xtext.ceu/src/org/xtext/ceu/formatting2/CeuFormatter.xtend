@@ -16,6 +16,8 @@ import org.xtext.ceu.ceu.If
 import org.xtext.ceu.ceu.Root
 import org.xtext.ceu.ceu.Stmt
 import org.xtext.ceu.services.CeuGrammarAccess
+import org.eclipse.xtext.validation.Check
+import com.ibm.icu.text.SpoofChecker.CheckResult
 
 class CeuFormatter extends AbstractFormatter2 {
 	
@@ -44,11 +46,12 @@ class CeuFormatter extends AbstractFormatter2 {
 		}
 	}
 	def dispatch void format(Dcl_fun d, extension IFormattableDocument document) {
-		d.regionFor.keyword("function").append[oneSpace]
-		d.regionFor.keyword("@rec").surround[oneSpace]
-			.nextSemanticRegion.surround[oneSpace]
-		d.regionFor.keyword("=>").surround[oneSpace]
-			.nextSemanticRegion.surround[oneSpace]
+		d.regionFor.keyword("function").append[oneSpace]		
+
+//		d.regionFor.keyword("@rec").surround[oneSpace]
+//		d.regionFor.keyword("@rec").nextSemanticRegion.surround[oneSpace]
+//		d.regionFor.keyword("=>").surround[oneSpace]
+//			.nextSemanticRegion.surround[oneSpace]
 	}
 	def dispatch void format(Dcl_fun_do d, extension IFormattableDocument document) {
 		d.dcl_fun.format
@@ -63,9 +66,9 @@ class CeuFormatter extends AbstractFormatter2 {
 		d.regionFor.keyword("class").nextSemanticRegion.prepend[oneSpace].append[newLine]
 		d.regionFor.keyword("with").append[newLine]
 		d.blockI.format
-		d.regionFor.keyword("do").append[newLine].prepend[newLine]
+		d.^do.regionFor.keyword("do").append[newLine].prepend[newLine]
 		d.^do.format
-		d.regionFor.keyword("end").append[newLine].prepend[newLine]
+		d.^do.regionFor.keyword("end").append[newLine].prepend[newLine]
 		d.blockI.prepend[indent]
 		interior(
 			d.regionFor.keyword("with"),
