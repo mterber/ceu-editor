@@ -21,6 +21,9 @@ import org.xtext.ceu.ceu.If
 import org.xtext.ceu.ceu.Root
 import org.xtext.ceu.ceu.Stmt
 import org.xtext.ceu.services.CeuGrammarAccess
+import org.xtext.ceu.ceu.Dcl_ifc
+import org.xtext.ceu.ceu.Dcl_imp
+import org.xtext.ceu.ceu.Async
 
 class CeuFormatter extends AbstractFormatter2 {
 
@@ -29,7 +32,7 @@ class CeuFormatter extends AbstractFormatter2 {
 	def dispatch void format(Root root, extension IFormattableDocument document) {
 		// TODO: format HiddenRegions around keywords, attributes, cross references, etc. 
 		for (Stmt stmt : root.getStmt()) {
-			stmt.format;
+			stmt.format.prepend[noIndentation];
 		}
 	}
 
@@ -184,7 +187,31 @@ class CeuFormatter extends AbstractFormatter2 {
 			[indent]
 		)
 		d.regionFor.keyword(";").append[newLine]
-		d.regionFor.keyword("or").prepend[newLine].append[newLine]
+		d.regionFor.keyword("or").prepend[setNewLines(2,2,3)].append[setNewLines(2,2,3)]
+	}
+	
+	/*		Interface-Blocks		*/
+	def dispatch void format(Dcl_ifc d, extension IFormattableDocument document) {
+		d.regionFor.keyword("interface").prepend[noIndentation]
+			.nextSemanticRegion.surround[oneSpace]
+		interior(
+			d.regionFor.keyword("with").append[newLine],
+			d.regionFor.keyword("end").prepend[newLine],
+			[indent]
+		)
+	}
+	def dispatch void format(Dcl_imp d, extension IFormattableDocument document) {
+		d.regionFor.keyword("interface").prepend[noIndentation]
+			.nextSemanticRegion.surround[oneSpace]
+			
+		val colon = d.regionFor.keyword("interface")
+						.nextSemanticRegion		// => name
+						.nextSemanticRegion		// => ',' (optional keyword)
+		if (colon.text.equals(","))	{
+			colon
+			.prepend[noSpace]
+			.append[oneSpace]	// formatting "a, b, c, ..."
+		}
 	}
 
 // TODO: implement for Return, Dcl_var, Dcl_var_org, Dcl_var_plain_set, Var_constr, Dcl_var_set, Dcl_pool, Dcl_int, Dcl_fun, Dcl_fun_do, Dcl_ext_call, Dcl_ext1, Dcl_ext_evt, Dcl_ext_io, Dcl_cls, BlockI, Dcl_ifc, Dcl_adt, Dcl_adt_struct, Dcl_adt_union, Dcl_adt_tag, Dcl_nat, Set, Adt_constr_one, Adt_explist, Vector_tup, Vector_constr, Await, Awaits, Emit, Emit_ps, DoOrg, Spawn, Spawn_constr, Kill, Do, Block, If, Loop, VarList, TraverseLoop, TraverseRec, Finalize, Par, Watching, Pause, Async, Thread, Isr, RawStmt, Raw, Type, ExpList, TupleType_1, TupleTypeItem_2, TupleType_2, WCLOCKE, Exp1, Exp2, Exp3, Exp4, Exp5, Exp6, Exp7, Exp8, Exp9, Exp10, Exp11, Prim, Cast
