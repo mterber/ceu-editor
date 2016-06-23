@@ -8,19 +8,22 @@ import org.eclipse.xtext.formatting2.AbstractFormatter2
 import org.eclipse.xtext.formatting2.IFormattableDocument
 import org.xtext.ceu.ceu.Block
 import org.xtext.ceu.ceu.BlockI
+import org.xtext.ceu.ceu.Dcl_adt
+import org.xtext.ceu.ceu.Dcl_adt_struct
+import org.xtext.ceu.ceu.Dcl_adt_tag
+import org.xtext.ceu.ceu.Dcl_adt_union
 import org.xtext.ceu.ceu.Dcl_cls
 import org.xtext.ceu.ceu.Dcl_fun
 import org.xtext.ceu.ceu.Dcl_fun_do
 import org.xtext.ceu.ceu.Do
+import org.xtext.ceu.ceu.Host_c
 import org.xtext.ceu.ceu.If
 import org.xtext.ceu.ceu.Root
 import org.xtext.ceu.ceu.Stmt
 import org.xtext.ceu.services.CeuGrammarAccess
-import org.eclipse.xtext.validation.Check
-import com.ibm.icu.text.SpoofChecker.CheckResult
 
 class CeuFormatter extends AbstractFormatter2 {
-	
+
 	@Inject extension CeuGrammarAccess
 
 	def dispatch void format(Root root, extension IFormattableDocument document) {
@@ -30,6 +33,7 @@ class CeuFormatter extends AbstractFormatter2 {
 		}
 	}
 
+	/*		Do-Block		*/
 	def dispatch void format(Do d, extension IFormattableDocument document) {
 		d.regionFor.keyword("do").prepend[newLine].append[newLine]
 		d.block.format
@@ -39,29 +43,41 @@ class CeuFormatter extends AbstractFormatter2 {
 			[indent]
 		)
 	}
-	
+
+	/*		Block		*/
 	def dispatch void format(Block b, extension IFormattableDocument document) {
 		for (element : b.stmt) {
 			element.format.append[newLine]
 		}
 	}
-	def dispatch void format(Dcl_fun d, extension IFormattableDocument document) {
-		d.regionFor.keyword("function").append[oneSpace]		
 
-//		d.regionFor.keyword("@rec").surround[oneSpace]
-//		d.regionFor.keyword("@rec").nextSemanticRegion.surround[oneSpace]
-//		d.regionFor.keyword("=>").surround[oneSpace]
-//			.nextSemanticRegion.surround[oneSpace]
+	/*		Functions		*/
+	def dispatch void format(Dcl_fun d, extension IFormattableDocument document) {
+		d.regionFor.keyword("function").append[oneSpace]
+		
+		/* avoiding NullPointerException of optional "@rec" */
+		if (d.regionFor.keyword("function").nextSemanticRegion.text.equals("@rec")) {
+			d.regionFor.keyword("@rec").surround[oneSpace]
+			d.regionFor.keyword("@rec")
+				.nextSemanticRegion.surround[oneSpace]
+		} else {
+			d.regionFor.keyword("function").nextSemanticRegion.surround[oneSpace]
+		}
+			d.regionFor.keyword("=>").surround[oneSpace]
+				.nextSemanticRegion.surround[oneSpace]
+				.nextSemanticRegion.surround[oneSpace]
 	}
+
 	def dispatch void format(Dcl_fun_do d, extension IFormattableDocument document) {
 		d.dcl_fun.format
 		d.^do.format
 		d.regionFor.keyword(";").prepend[noSpace]
 		d.^do.regionFor.keyword("do").prepend[newLine].append[newLine]
 	}
-	
+
+	/*		Class/Organism		*/
 	def dispatch void format(Dcl_cls d, extension IFormattableDocument document) {
-		
+
 		d.regionFor.keyword("class").append[oneSpace]
 		d.regionFor.keyword("class").nextSemanticRegion.prepend[oneSpace].append[newLine]
 		d.regionFor.keyword("with").append[newLine]
@@ -76,7 +92,8 @@ class CeuFormatter extends AbstractFormatter2 {
 			[indent]
 		)
 	}
-	
+
+	/*		Interface-Block		*/
 	def dispatch void format(BlockI b, extension IFormattableDocument document) {
 		for (element : b.dcl_fun) {
 			element.format
@@ -95,7 +112,8 @@ class CeuFormatter extends AbstractFormatter2 {
 		}
 		b.regionFor.keyword(";").append[newLine].prepend[noSpace]
 	}
-	
+
+	/*		If Expression		*/
 	def dispatch void format(If i, extension IFormattableDocument document) {
 		for (key : i.regionFor.keywords("then")) {
 			key.prepend[oneSpace].append[newLine]
@@ -122,7 +140,52 @@ class CeuFormatter extends AbstractFormatter2 {
 			i.regionFor.keyword("end"),
 			[indent]
 		)
+
 	}
-	
-	// TODO: implement for Return, Dcl_var, Dcl_var_org, Dcl_var_plain_set, Var_constr, Dcl_var_set, Dcl_pool, Dcl_int, Dcl_fun, Dcl_fun_do, Dcl_ext_call, Dcl_ext1, Dcl_ext_evt, Dcl_ext_io, Dcl_cls, BlockI, Dcl_ifc, Dcl_adt, Dcl_adt_struct, Dcl_adt_union, Dcl_adt_tag, Dcl_nat, Set, Adt_constr_one, Adt_explist, Vector_tup, Vector_constr, Await, Awaits, Emit, Emit_ps, DoOrg, Spawn, Spawn_constr, Kill, Do, Block, If, Loop, VarList, TraverseLoop, TraverseRec, Finalize, Par, Watching, Pause, Async, Thread, Isr, RawStmt, Raw, Type, ExpList, TupleType_1, TupleTypeItem_2, TupleType_2, WCLOCKE, Exp1, Exp2, Exp3, Exp4, Exp5, Exp6, Exp7, Exp8, Exp9, Exp10, Exp11, Prim, Cast
+
+	/*		Native Blocks		*/
+	def dispatch void format(Host_c h, extension IFormattableDocument document) {
+		h.regionFor.keyword("do").append[newLine]
+		h.regionFor.keyword("end").prepend[newLine]
+		interior(
+			h.regionFor.keyword("do"),
+			h.regionFor.keyword("end"),
+			[indent]
+		)
+	}
+
+	/*		Abstract-DataType		*/
+	def dispatch void format(Dcl_adt d, extension IFormattableDocument document) {
+		interior(
+			d.regionFor.keyword("with").append[newLine],
+			d.regionFor.keyword("end").prepend[newLine],
+			[indent]
+		)
+		d.adt_struct.format
+		d.adt_union.format
+	}
+	def dispatch void format(Dcl_adt_struct d, extension IFormattableDocument document) {
+		d.regionFor.keyword(";").append[newLine]
+	}
+	def dispatch void format(Dcl_adt_union d, extension IFormattableDocument document) {
+		for (element : d.dcl_adt_tag) {
+			element.format.append[newLine]
+		}
+	}
+	def dispatch void format(Dcl_adt_tag d, extension IFormattableDocument document) {
+		if (d.regionFor.keyword("tag").nextSemanticRegion.nextSemanticRegion.text.equals(";")) {
+			d.regionFor.keyword("tag").nextSemanticRegion.append[noSpace]
+		} else {
+			d.regionFor.keyword("tag").nextSemanticRegion.append[newLine]
+		}
+		interior(
+			d.regionFor.keyword("with").append[newLine],
+			d.regionFor.keyword("end").prepend[newLine],
+			[indent]
+		)
+		d.regionFor.keyword(";").append[newLine]
+		d.regionFor.keyword("or").prepend[newLine].append[newLine]
+	}
+
+// TODO: implement for Return, Dcl_var, Dcl_var_org, Dcl_var_plain_set, Var_constr, Dcl_var_set, Dcl_pool, Dcl_int, Dcl_fun, Dcl_fun_do, Dcl_ext_call, Dcl_ext1, Dcl_ext_evt, Dcl_ext_io, Dcl_cls, BlockI, Dcl_ifc, Dcl_adt, Dcl_adt_struct, Dcl_adt_union, Dcl_adt_tag, Dcl_nat, Set, Adt_constr_one, Adt_explist, Vector_tup, Vector_constr, Await, Awaits, Emit, Emit_ps, DoOrg, Spawn, Spawn_constr, Kill, Do, Block, If, Loop, VarList, TraverseLoop, TraverseRec, Finalize, Par, Watching, Pause, Async, Thread, Isr, RawStmt, Raw, Type, ExpList, TupleType_1, TupleTypeItem_2, TupleType_2, WCLOCKE, Exp1, Exp2, Exp3, Exp4, Exp5, Exp6, Exp7, Exp8, Exp9, Exp10, Exp11, Prim, Cast
 }
