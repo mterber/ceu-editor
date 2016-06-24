@@ -15,15 +15,16 @@ import org.xtext.ceu.ceu.Dcl_adt_union
 import org.xtext.ceu.ceu.Dcl_cls
 import org.xtext.ceu.ceu.Dcl_fun
 import org.xtext.ceu.ceu.Dcl_fun_do
+import org.xtext.ceu.ceu.Dcl_ifc
+import org.xtext.ceu.ceu.Dcl_imp
 import org.xtext.ceu.ceu.Do
+import org.xtext.ceu.ceu.Global
 import org.xtext.ceu.ceu.Host_c
 import org.xtext.ceu.ceu.If
 import org.xtext.ceu.ceu.Root
 import org.xtext.ceu.ceu.Stmt
 import org.xtext.ceu.services.CeuGrammarAccess
-import org.xtext.ceu.ceu.Dcl_ifc
-import org.xtext.ceu.ceu.Dcl_imp
-import org.xtext.ceu.ceu.Async
+import org.xtext.ceu.ceu.Finalize
 
 class CeuFormatter extends AbstractFormatter2 {
 
@@ -187,7 +188,7 @@ class CeuFormatter extends AbstractFormatter2 {
 			[indent]
 		)
 		d.regionFor.keyword(";").append[newLine]
-		d.regionFor.keyword("or").prepend[setNewLines(2,2,3)].append[setNewLines(2,2,3)]
+		d.regionFor.keyword("or").prepend[newLines = 2].append[setNewLines(2,2,3)]
 	}
 	
 	/*		Interface-Blocks		*/
@@ -207,11 +208,28 @@ class CeuFormatter extends AbstractFormatter2 {
 		val colon = d.regionFor.keyword("interface")
 						.nextSemanticRegion		// => name
 						.nextSemanticRegion		// => ',' (optional keyword)
-		if (colon.text.equals(","))	{
-			colon
-			.prepend[noSpace]
-			.append[oneSpace]	// formatting "a, b, c, ..."
+		
+		for (element : d.allSemanticRegions) {
+			if (element.text.equals(",")) {
+				element
+				.prepend[noSpace]
+				.append[oneSpace]	// formatting "a, b, c, ..."
+			}
 		}
+	}
+	
+	/*		finalize		*/
+	def dispatch void format(Finalize f, extension IFormattableDocument document) {
+		interior(
+			f.regionFor.keyword("finalize").append[newLine],
+			f.regionFor.keyword("with").prepend[newLine].append[newLine],
+			[indent]
+		)
+		interior(
+			f.regionFor.keyword("with"),
+			f.regionFor.keyword("end").prepend[newLine],
+			[indent]
+		)
 	}
 
 // TODO: implement for Return, Dcl_var, Dcl_var_org, Dcl_var_plain_set, Var_constr, Dcl_var_set, Dcl_pool, Dcl_int, Dcl_fun, Dcl_fun_do, Dcl_ext_call, Dcl_ext1, Dcl_ext_evt, Dcl_ext_io, Dcl_cls, BlockI, Dcl_ifc, Dcl_adt, Dcl_adt_struct, Dcl_adt_union, Dcl_adt_tag, Dcl_nat, Set, Adt_constr_one, Adt_explist, Vector_tup, Vector_constr, Await, Awaits, Emit, Emit_ps, DoOrg, Spawn, Spawn_constr, Kill, Do, Block, If, Loop, VarList, TraverseLoop, TraverseRec, Finalize, Par, Watching, Pause, Async, Thread, Isr, RawStmt, Raw, Type, ExpList, TupleType_1, TupleTypeItem_2, TupleType_2, WCLOCKE, Exp1, Exp2, Exp3, Exp4, Exp5, Exp6, Exp7, Exp8, Exp9, Exp10, Exp11, Prim, Cast
