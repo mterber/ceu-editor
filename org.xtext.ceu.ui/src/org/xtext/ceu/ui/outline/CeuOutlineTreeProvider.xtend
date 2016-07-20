@@ -189,18 +189,6 @@ class CeuOutlineTreeProvider extends DefaultOutlineTreeProvider {
 	def dispatch void createNode(IOutlineNode parentNode, Block b) { }
 	def dispatch void createNode(IOutlineNode parentNode, BlockI b) { }
 	
-//	def dispatch void createNode(IOutlineNode parentNode, Dcl_cls d) {
-//		for (element : d.blockI.dcl_var) {
-//			createNode(parentNode, element)
-//		}
-//		for (element : d.blockI.dcl_int) {
-//			createNode(parentNode, element)
-//		}
-//		for (element : d.blockI.dcl_imp) {
-//			createNode(parentNode, element)
-//		}
-//	}
-	
 //	---------------------- defining OutlineNodes ----------------------
 	
 	/* Dcl_adt */
@@ -212,7 +200,7 @@ class CeuOutlineTreeProvider extends DefaultOutlineTreeProvider {
 	/* Dcl_var */
 	def dispatch isLeaf(Dcl_var d) { true }
 	def dispatch Object text(Dcl_var d) {
-		return '(Var) ' + d.name
+		return '(Var) ' + d.name + ': ' + returnTypeString(d)
 	}
 	
 	/* Dcl_cls */
@@ -229,5 +217,21 @@ class CeuOutlineTreeProvider extends DefaultOutlineTreeProvider {
 	def dispatch isLeaf(Dcl_int d) { true }
 	def dispatch Object text(Dcl_int d) {
 		return '(Internal Event)'
+	}
+	
+	def String returnTypeString(Dcl_var d) {
+		if (d.type.type_prim == null) {
+			if (d.type.type_cls_adt == null) {
+				if (d.type.type_nat == null) {
+					"unknown Type"
+				} else {
+					d.type.type_nat
+				}
+			} else {
+				d.type.type_cls_adt
+			}
+		} else {
+			d.type.type_prim.name
+		}
 	}
 }
