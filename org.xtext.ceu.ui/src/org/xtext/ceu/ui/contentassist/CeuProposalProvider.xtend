@@ -3,10 +3,23 @@
  */
 package org.xtext.ceu.ui.contentassist
 
+import org.eclipse.xtext.Keyword
+import org.eclipse.xtext.ui.editor.contentassist.ContentAssistContext
+import org.eclipse.xtext.ui.editor.contentassist.ICompletionProposalAcceptor
 
 /**
  * See https://www.eclipse.org/Xtext/documentation/304_ide_concepts.html#content-assist
  * on how to customize the content assistant.
  */
 class CeuProposalProvider extends AbstractCeuProposalProvider {
+	override completeKeyword(Keyword keyword, ContentAssistContext contentAssistContext, ICompletionProposalAcceptor acceptor) {
+		val FILTERED_KEYWORDS = newHashSet(
+			"&", "&&", "+", "-", "$", "$$", "(", "*", "[", "[[", "?", "!", "]]", "()", "or", "and",
+			"!=", "==", "<=", ">=", "<", ">", "|", "^", "<<", ">>", "/", "%", ")", "{", "}", "~"
+		)
+		if(FILTERED_KEYWORDS.contains(keyword.value)) {
+			return
+		}
+		super.completeKeyword(keyword, contentAssistContext, acceptor)
+	}
 }
