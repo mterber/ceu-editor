@@ -4,10 +4,25 @@
 package org.xtext.ceu.ui
 
 import org.eclipse.xtend.lib.annotations.FinalFieldsConstructor
+import org.eclipse.xtext.ui.editor.syntaxcoloring.IHighlightingConfiguration
+import org.xtext.ceu.ui.syntaxcoloring.HighlightingConfiguration
+import org.eclipse.xtext.ide.editor.syntaxcoloring.AbstractAntlrTokenToAttributeIdMapper
+import org.xtext.ceu.ui.syntaxcoloring.CeuAntlrTokenToAttributeIdMapper
+import org.xtext.ceu.ui.syntaxcoloring.CeuSemanticHighlightingCalculator
+import org.eclipse.xtext.ide.editor.syntaxcoloring.ISemanticHighlightingCalculator
 
 /**
  * Use this class to register components to be used within the Eclipse IDE.
  */
 @FinalFieldsConstructor
 class CeuUiModule extends AbstractCeuUiModule {
+	def Class<? extends IHighlightingConfiguration> bindIHighlightingConfiguration() {
+		return HighlightingConfiguration
+	}
+	def Class<? extends AbstractAntlrTokenToAttributeIdMapper> bindAbstractAntlrTokenToAttributeIdMapper() {
+		return CeuAntlrTokenToAttributeIdMapper
+	}
+	def Class<? extends ISemanticHighlightingCalculator> bindISemanticHighlightingCalculator() {
+		return CeuSemanticHighlightingCalculator
+	}
 }
