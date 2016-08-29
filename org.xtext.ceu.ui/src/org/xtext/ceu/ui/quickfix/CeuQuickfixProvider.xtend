@@ -4,6 +4,10 @@
 package org.xtext.ceu.ui.quickfix
 
 import org.eclipse.xtext.ui.editor.quickfix.DefaultQuickfixProvider
+import org.eclipse.xtext.ui.editor.quickfix.Fix
+import org.eclipse.xtext.ui.editor.quickfix.IssueResolutionAcceptor
+import org.eclipse.xtext.validation.Issue
+import org.xtext.ceu.validation.CeuSyntaxErrorMessageProvider
 
 /**
  * Custom quickfixes.
@@ -11,6 +15,46 @@ import org.eclipse.xtext.ui.editor.quickfix.DefaultQuickfixProvider
  * See https://www.eclipse.org/Xtext/documentation/304_ide_concepts.html#quick-fixes
  */
 class CeuQuickfixProvider extends DefaultQuickfixProvider {
+	
+	@Fix(CeuSyntaxErrorMessageProvider.INVALID_VAR_IDENTIFIER)
+	def lowcaseVarIdentifier(Issue issue, IssueResolutionAcceptor acceptor) {
+		acceptor.accept(issue, 'name to lower case', 'change the name to lower case', 'lowcase.png') [
+			context |
+			val xtextDocument = context.xtextDocument
+			val firstLetter = xtextDocument.get(issue.offset, 1)
+			xtextDocument.replace(issue.offset, 1, firstLetter.toLowerCase)
+		]
+	}
+	
+	@Fix(CeuSyntaxErrorMessageProvider.INVALID_INT_IDENTIFIER)
+	def lowcaseIntEventIdentifier(Issue issue, IssueResolutionAcceptor acceptor) {
+		acceptor.accept(issue, 'name to lower case', 'change the name to lower case', 'lowcase.png') [
+			context |
+			val xtextDocument = context.xtextDocument
+			val firstLetter = xtextDocument.get(issue.offset, 1)
+			xtextDocument.replace(issue.offset, 1, firstLetter.toLowerCase)
+		]
+	}
+	
+	@Fix(CeuSyntaxErrorMessageProvider.INVALID_EXT_IDENTIFIER)
+	def upcaseExtEventIdentifier(Issue issue, IssueResolutionAcceptor acceptor) {
+		acceptor.accept(issue, 'name to upper case', 'make all letters capital', 'upcase.png') [
+			context |
+			val xtextDocument = context.xtextDocument
+			val word = xtextDocument.get(issue.offset, issue.length)
+			xtextDocument.replace(issue.offset, issue.length, word.toUpperCase)
+		]
+	}
+	
+	@Fix(CeuSyntaxErrorMessageProvider.INVALID_ROOT_IDENTIFIER)
+	def capitalizeName(Issue issue, IssueResolutionAcceptor acceptor) {
+		acceptor.accept(issue, 'Capitalize name', 'Capitalize the name.', 'upcase.png') [
+			context |
+			val xtextDocument = context.xtextDocument
+			val firstLetter = xtextDocument.get(issue.offset, 1)
+			xtextDocument.replace(issue.offset, 1, firstLetter.toUpperCase)
+		]
+	}
 
 //	@Fix(CeuValidator.INVALID_NAME)
 //	def capitalizeName(Issue issue, IssueResolutionAcceptor acceptor) {
