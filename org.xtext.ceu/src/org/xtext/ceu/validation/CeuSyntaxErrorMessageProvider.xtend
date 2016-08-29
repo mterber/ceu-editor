@@ -1,22 +1,20 @@
 package org.xtext.ceu.validation
 
 import javax.inject.Inject
+import org.eclipse.xtext.GrammarUtil
 import org.eclipse.xtext.IGrammarAccess
 import org.eclipse.xtext.nodemodel.SyntaxErrorMessage
 import org.eclipse.xtext.parser.antlr.SyntaxErrorMessageProvider
-import org.eclipse.xtext.GrammarUtil
-import org.xtext.ceu.ceu.Dcl_var
-import org.xtext.ceu.services.CeuGrammarAccess
-import org.xtext.ceu.services.CeuGrammarAccess.Dcl_varElements
 
 class CeuSyntaxErrorMessageProvider extends SyntaxErrorMessageProvider {
 	
 	@Inject IGrammarAccess grammarAccess	
 
-	public static val INVALID_VAR_IDENTIFIER = "INVALID_VAR_IDENTIFIER"
-	public static val INVALID_INT_IDENTIFIER = "INVALID_INT_IDENTIFIER"
-	public static val INVALID_EXT_IDENTIFIER = "INVALID_EXT_IDENTIFIER"
-	public static val INVALID_ROOT_IDENTIFIER = "INVALID_ROOT_IDENTIFIER"
+	public static val INVALID_VAR_IDENTIFIER 			= "INVALID_VAR_IDENTIFIER"
+	public static val INVALID_INT_IDENTIFIER 			= "INVALID_INT_IDENTIFIER"
+	public static val INVALID_EXT_IDENTIFIER 			= "INVALID_EXT_IDENTIFIER"
+	public static val INVALID_ROOT_IDENTIFIER 			= "INVALID_ROOT_IDENTIFIER"
+	public static val IDENTIFIER_STARTS_NOT_WITH_LETTER = "IDENTIFIER_STARTS_NOT_WITH_LETTER"
 
 	override getSyntaxErrorMessage(IParserErrorContext context) {
 		val unexpectedText = context?.recognitionException?.token?.text
@@ -45,7 +43,12 @@ class CeuSyntaxErrorMessageProvider extends SyntaxErrorMessageProvider {
 					INVALID_ROOT_IDENTIFIER
 				)
 			}
-			
+			if (!(Character.isLetter(unexpectedText.charAt(0))) || !(unexpectedText.startsWith("_"))) {
+				return new SyntaxErrorMessage(
+					"Identifier have to start with a letter or '_'!",
+					IDENTIFIER_STARTS_NOT_WITH_LETTER
+				)
+			}
         }
 		return super.getSyntaxErrorMessage(context)
 	}
