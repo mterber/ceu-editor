@@ -10,6 +10,9 @@ import org.eclipse.xtext.ui.editor.contentassist.ContentAssistContext
 import org.eclipse.xtext.ui.editor.contentassist.ICompletionProposalAcceptor
 import org.xtext.ceu.ceu.Dcl_cls
 import org.xtext.ceu.ceu.Dcl_adt
+import org.xtext.ceu.ceu.Dcl_ext0
+import org.xtext.ceu.ceu.Dcl_int
+import org.eclipse.xtext.RuleCall
 
 /**
  * See https://www.eclipse.org/Xtext/documentation/304_ide_concepts.html#content-assist
@@ -34,6 +37,48 @@ class CeuProposalProvider extends AbstractCeuProposalProvider {
 		}
 		for (element : context.resource.allContents.filter(Dcl_adt).toIterable) {
 			acceptor.accept(createCompletionProposal(element.name, context))
+		}
+	}
+	
+	override completeAwaits_Name(EObject model, Assignment assignment, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
+		super.completeAwaits_Name(model, assignment, context, acceptor)
+		for (element : context.resource.allContents.filter(Dcl_ext0).toIterable) {
+			for (name : element.name) {
+				acceptor.accept(createCompletionProposal(name, context))
+			}
+		}
+		for (element : context.resource.allContents.filter(Dcl_int).toIterable) {
+			for (name : element.name) {
+				acceptor.accept(createCompletionProposal(name, context))
+			}
+		}
+	}
+	
+	override completeEmit_Name(EObject model, Assignment assignment, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
+		super.completeEmit_Name(model, assignment, context, acceptor)
+		for (element : context.resource.allContents.filter(Dcl_ext0).toIterable) {
+			for (name : element.name) {
+				acceptor.accept(createCompletionProposal(name, context))
+			}
+		}
+		for (element : context.resource.allContents.filter(Dcl_int).toIterable) {
+			for (name : element.name) {
+				acceptor.accept(createCompletionProposal(name, context))
+			}
+		}
+	}
+	
+	override completeEmit_Exp(EObject model, Assignment assignment, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
+		super.completeEmit_Exp(model, assignment, context, acceptor)
+		for (element : context.resource.allContents.filter(Dcl_ext0).toIterable) {
+			for (name : element.name) {
+				acceptor.accept(createCompletionProposal(name, context))
+			}
+		}
+		for (element : context.resource.allContents.filter(Dcl_int).toIterable) {
+			for (name : element.name) {
+				acceptor.accept(createCompletionProposal(name, context))
+			}
 		}
 	}
 	
