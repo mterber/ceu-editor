@@ -27,8 +27,8 @@ class CeuProposalProvider extends AbstractCeuProposalProvider {
 		super.completeKeyword(keyword, contentAssistContext, acceptor)
 	}
 	
-	override completeDcl_var_Type(EObject model, Assignment assignment, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
-		super.completeDcl_var_Type(model, assignment, context, acceptor)
+	override completeType_Type_cls_adt(EObject model, Assignment assignment, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
+		super.completeType_Type_cls_adt(model, assignment, context, acceptor)
 		for (element : context.resource.allContents.filter(Dcl_cls).toIterable) {
 			acceptor.accept(createCompletionProposal(element.name, context))
 		}
