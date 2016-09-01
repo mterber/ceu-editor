@@ -18,38 +18,51 @@ class CeuSyntaxErrorMessageProvider extends SyntaxErrorMessageProvider {
 
 	override getSyntaxErrorMessage(IParserErrorContext context) {
 		val unexpectedText = context?.recognitionException?.token?.text
-		if (!(GrammarUtil::getAllAlternatives(grammarAccess.getGrammar()).contains(unexpectedText))) {
-			if (context.currentContext.eClass.name == "Dcl_var") {
-				return new SyntaxErrorMessage(
-					"Identifiers for variables have to start with a lower case!",
-					INVALID_VAR_IDENTIFIER
-				)
-			}
-			if (context.currentContext.eClass.name == "Dcl_int") {
-				return new SyntaxErrorMessage(
-					"Identifiers for intern events have to start with a lower case!",
-					INVALID_INT_IDENTIFIER
-				)
-			}
-			if (context.currentContext.eClass.name == "Dcl_ext_evt") {
-				return new SyntaxErrorMessage(
-					"Identifiers for extern events have to consist of capital letters only!",
-					INVALID_EXT_IDENTIFIER
-				)
-			}
-			if (context.currentContext.eClass.name == "Root") {
-				return new SyntaxErrorMessage(
-					"The identifier have to start with a capital!",
-					INVALID_ROOT_IDENTIFIER
-				)
-			}
-			if (!(Character.isLetter(unexpectedText.charAt(0))) || !(unexpectedText.startsWith("_"))) {
+
+		println('''
+		------------------------------
+		>> prev: «context?.currentNode?.previousSibling?.semanticElement?.eClass?.name»
+		>> curr: «context?.currentNode?.semanticElement?.eClass?.name»
+		>> next: «context?.currentNode?.nextSibling?.semanticElement?.eClass?.name»		
+		------------------------------
+		''')
+
+		if (context.currentNode.semanticElement.eClass.name == "Dcl_var" 
+			&& context?.currentNode?.previousSibling?.semanticElement.eClass.name == "Type"
+		) {
+			if (!(Character.isLetter(unexpectedText.charAt(0))) && !(unexpectedText.startsWith("_"))) {
 				return new SyntaxErrorMessage(
 					"Identifier have to start with a letter or '_'!",
 					IDENTIFIER_STARTS_NOT_WITH_LETTER
 				)
 			}
-        }
+			return new SyntaxErrorMessage(
+				"Identifiers for variables have to start with a lower case!",
+				INVALID_VAR_IDENTIFIER
+			)
+		}
+		if (context.currentNode.semanticElement.eClass.name == "Dcl_int"
+			&& context?.currentNode?.previousSibling?.semanticElement.eClass.name == "Type"
+		) {
+			return new SyntaxErrorMessage(
+				"Identifiers for intern events have to start with a lower case!",
+				INVALID_INT_IDENTIFIER
+			)
+		}
+		if (context.currentNode.semanticElement.eClass.name == "Dcl_ext_evt"
+			&& context?.currentNode?.previousSibling?.semanticElement.eClass.name == "Type"
+		) {
+			return new SyntaxErrorMessage(
+				"Identifiers for extern events have to consist of capital letters only!",
+				INVALID_EXT_IDENTIFIER
+			)
+		}
+		if (context.currentNode.semanticElement.eClass.name == "Root") {
+			return new SyntaxErrorMessage(
+				"The identifier have to start with a capital!",
+				INVALID_ROOT_IDENTIFIER
+			)
+		}
 		return super.getSyntaxErrorMessage(context)
 	}
 }
