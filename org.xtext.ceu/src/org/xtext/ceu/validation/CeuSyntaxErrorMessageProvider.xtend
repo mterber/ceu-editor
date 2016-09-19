@@ -20,14 +20,18 @@ class CeuSyntaxErrorMessageProvider extends SyntaxErrorMessageProvider {
 		val unexpectedText = context?.recognitionException?.token?.text
 
 		println('''
+		--------
+		Â«context.currentContext.eResourceÂ»
+		
+		Â«context.currentContext.eClass.nameÂ»
 		------------------------------
-		>> prev: «context?.currentNode?.previousSibling?.semanticElement?.eClass?.name»
-		>> curr: «context?.currentNode?.semanticElement?.eClass?.name»
-		>> next: «context?.currentNode?.nextSibling?.semanticElement?.eClass?.name»		
+		>> prev: ï¿½context?.currentNode?.previousSibling?.semanticElement?.eClass?.nameï¿½
+		>> curr: ï¿½context?.currentNode?.semanticElement?.eClass?.nameï¿½
+		>> next: ï¿½context?.currentNode?.nextSibling?.semanticElement?.eClass?.nameï¿½		
 		------------------------------
 		''')
 
-		if (context.currentNode.semanticElement.eClass.name == "Dcl_var" 
+		if (context.currentNode.semanticElement.eClass.name == "Dcl_var" // ID_VAR_TERMINAL abfragen
 			&& context?.currentNode?.previousSibling?.semanticElement.eClass.name == "Type"
 		) {
 			if (!(Character.isLetter(unexpectedText.charAt(0))) && !(unexpectedText.startsWith("_"))) {

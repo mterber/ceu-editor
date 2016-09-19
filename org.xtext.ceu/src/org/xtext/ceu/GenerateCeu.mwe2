@@ -37,6 +37,7 @@ Workflow {
 					backtrack = true
 				}
 			}
+			renameRefactoring = {}
 		}
 	}
 }
