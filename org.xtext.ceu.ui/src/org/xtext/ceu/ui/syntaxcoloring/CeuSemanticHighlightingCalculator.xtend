@@ -18,28 +18,18 @@ class CeuSemanticHighlightingCalculator implements ISemanticHighlightingCalculat
 		
 		val INode root = resource.parseResult.rootNode
 		for (node : root.asTreeIterable) {
-			println('''
-			||||||||| «node.text» |||||||||
-			> offset: «node.offset»
-			> length: «node.length»
-			> semnatic element: «node.semanticElement.eClass.name»
-			
-			> grammarElement: «node.grammarElement»
-			> grammarElement interfaces: «node.grammarElement.class.interfaces»
-			> «node»
-			||||||
-			''')
+						
 //			if (node.semanticElement.eClass.name == "Dcl_ext1") {
 //				println('''
 //				>>>>>>>>>>>>>>>>>>>>>>> instance of! <<<<<<<<<<<<<<<<<<<<<<<
 //				''')
 //				for (element : node.asTreeIterable) {
 //					println('''
-//					++ «element.semanticElement.eClass.name»
-//					-- «element.semanticElement»
-//					** «element.length»
+//					++ ï¿½element.semanticElement.eClass.nameï¿½
+//					-- ï¿½element.semanticElementï¿½
+//					** ï¿½element.lengthï¿½
 //					
-//					text: «element.text»
+//					text: ï¿½element.textï¿½
 //					''')
 //				}
 //				println('-------------------------')

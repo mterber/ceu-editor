@@ -20,7 +20,7 @@ class HighlightingConfiguration extends DefaultHighlightingConfiguration {
 	def preProcTextStyle() {
 		var textStyle = defaultTextStyle.copy
 		textStyle.color = (new RGB(255, 155, 100))
-		textStyle.style = SWT.ITALIC
+		textStyle.style = SWT.BOLD
 		return textStyle
 	}
 	
@@ -28,7 +28,6 @@ class HighlightingConfiguration extends DefaultHighlightingConfiguration {
 		var textStyle = defaultTextStyle.copy
 		textStyle.color = (new RGB(100, 125, 50))
 		textStyle.style = SWT.ITALIC
-		textStyle.backgroundColor = (new RGB(0,0,0))
 		return textStyle
 	}
 	
