@@ -3,6 +3,15 @@
  */
 package org.xtext.ceu.scoping
 
+import org.eclipse.emf.ecore.EObject
+import org.eclipse.emf.ecore.EReference
+import org.xtext.ceu.ceu.Prim
+import org.xtext.ceu.ceu.CeuPackage
+import org.eclipse.xtext.scoping.Scopes
+import org.eclipse.xtext.EcoreUtil2
+import org.eclipse.emf.ecore.util.EcoreUtil
+import org.xtext.ceu.ceu.Dcl_int
+import org.xtext.ceu.ceu.Dcl_var
 
 /**
  * This class contains custom scoping description.
@@ -11,5 +20,42 @@ package org.xtext.ceu.scoping
  * on how and when to use it.
  */
 class CeuScopeProvider extends AbstractCeuScopeProvider {
+	
+	override getScope(EObject context, EReference reference) {
+		
+		println('''
+		>>>>>>>>>>>>>>>>>>><
+		
+		--¦ context: «context»
+		
+		--¦ reference: «reference»
+		
+		<<<<<<<<<<<<<<<<<<<>
+		
+		''')
+		
+		
+		if (context instanceof Prim
+			&& reference == CeuPackage.Literals.PRIM__VAR
+		) {
+			
+			val rootElement = EcoreUtil2.getRootContainer(context)
+			val candidates = EcoreUtil2.getAllContentsOfType(rootElement, Dcl_var)
+			
+			println('''
+			|||||||||||||
+			
+			root: «rootElement»
+			
+			candidates: «candidates»
+			
+			|||||||||||||
+			''')
+			
+			return Scopes.scopeFor(candidates)
+		}
 
+		return super.getScope(context, reference)
+	}
+	
 }
