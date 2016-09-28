@@ -7,19 +7,21 @@ import org.eclipse.swt.SWT
 
 class HighlightingConfiguration extends DefaultHighlightingConfiguration {
 	
-	val public static final EVENT_ID = "event"
-	val public static final PREPROC_ID = "Preprocessor"
+	val public static final EVENT_ID 	= "Event"
+	val public static final PREPROC_ID 	= "Preprocessor"
+	val public static final VAR_ID		= "Variables"
 	
 	override configure(IHighlightingConfigurationAcceptor acceptor) {
 		super.configure(acceptor)
 		
-		acceptor.acceptDefaultHighlighting(EVENT_ID, "Event", eventTextStyle())
-		acceptor.acceptDefaultHighlighting(PREPROC_ID, "Preprocessor", preProcTextStyle)
+		acceptor.acceptDefaultHighlighting(EVENT_ID, 	"Events", 		eventTextStyle())
+		acceptor.acceptDefaultHighlighting(PREPROC_ID, 	"Preprocessor", preProcTextStyle)
+		acceptor.acceptDefaultHighlighting(VAR_ID, 		"Variables", 	VarTextStyle)
 	}
 	
 	def preProcTextStyle() {
 		var textStyle = defaultTextStyle.copy
-		textStyle.color = (new RGB(255, 155, 100))
+		textStyle.color = (new RGB(255, 155, 155))
 		textStyle.style = SWT.BOLD
 		return textStyle
 	}
@@ -28,6 +30,11 @@ class HighlightingConfiguration extends DefaultHighlightingConfiguration {
 		var textStyle = defaultTextStyle.copy
 		textStyle.color = (new RGB(100, 125, 50))
 		textStyle.style = SWT.ITALIC
+		return textStyle
+	}
+	def VarTextStyle() {
+		var textStyle = defaultTextStyle.copy
+		textStyle.color = (new RGB(50, 50, 250))
 		return textStyle
 	}
 	

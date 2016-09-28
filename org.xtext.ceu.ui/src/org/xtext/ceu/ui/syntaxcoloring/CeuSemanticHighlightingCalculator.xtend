@@ -5,9 +5,6 @@ import org.eclipse.xtext.ide.editor.syntaxcoloring.ISemanticHighlightingCalculat
 import org.eclipse.xtext.nodemodel.INode
 import org.eclipse.xtext.resource.XtextResource
 import org.eclipse.xtext.util.CancelIndicator
-import org.xtext.ceu.ceu.Dcl_int
-import org.xtext.ceu.ceu.Dcl_ext1
-import org.xtext.ceu.ceu.Dcl_ext_evt
 
 class CeuSemanticHighlightingCalculator implements ISemanticHighlightingCalculator {
 	
@@ -19,7 +16,7 @@ class CeuSemanticHighlightingCalculator implements ISemanticHighlightingCalculat
 		val INode root = resource.parseResult.rootNode
 		for (node : root.asTreeIterable) {
 						
-//			if (node.semanticElement.eClass.name == "Dcl_ext1") {
+			if (node.semanticElement.eClass.name == "Dcl_ext1") {
 //				println('''
 //				>>>>>>>>>>>>>>>>>>>>>>> instance of! <<<<<<<<<<<<<<<<<<<<<<<
 //				''')
@@ -33,10 +30,19 @@ class CeuSemanticHighlightingCalculator implements ISemanticHighlightingCalculat
 //					''')
 //				}
 //				println('-------------------------')
-//				acceptor.addPosition(node.offset, node.length, HighlightingConfiguration.EVENT_ID)
-//			}
-			if (node.grammarElement instanceof Dcl_ext_evt) {
-				acceptor.addPosition(node.offset, node.length, HighlightingConfiguration.EVENT_ID)
+//				acceptor.addPosition(node.leafNodes.get(0).offset, node.leafNodes.get(0).length, HighlightingConfiguration.EVENT_ID)
+				for (leaf : node.leafNodes) {
+					if (leaf.grammarElement.eClass.name == "RuleCall") {
+						acceptor.addPosition(leaf.offset, leaf.length, HighlightingConfiguration.EVENT_ID)
+					}
+				}
+			}
+			if (node.semanticElement.eClass.name == "Dcl_var") {
+				for (leaf : node.leafNodes) {
+					if (leaf.grammarElement.eClass.name == "RuleCall") {
+						acceptor.addPosition(leaf.offset, leaf.length, HighlightingConfiguration.VAR_ID)
+					}
+				}
 			}
 		}
 	}
