@@ -30,57 +30,57 @@ class CeuProposalProvider extends AbstractCeuProposalProvider {
 		super.completeKeyword(keyword, contentAssistContext, acceptor)
 	}
 	
-	override completeType_Type_cls_adt(EObject model, Assignment assignment, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
-		super.completeType_Type_cls_adt(model, assignment, context, acceptor)
-		for (element : context.resource.allContents.filter(Dcl_cls).toIterable) {
-			acceptor.accept(createCompletionProposal(element.name, context))
-		}
-		for (element : context.resource.allContents.filter(Dcl_adt).toIterable) {
-			acceptor.accept(createCompletionProposal(element.name, context))
-		}
-	}
-	
-	override completeAwaits_Name(EObject model, Assignment assignment, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
-		super.completeAwaits_Name(model, assignment, context, acceptor)
-		for (element : context.resource.allContents.filter(Dcl_ext0).toIterable) {
-			for (name : element.name) {
-				acceptor.accept(createCompletionProposal(name, context))
-			}
-		}
-		for (element : context.resource.allContents.filter(Dcl_int).toIterable) {
-			for (name : element.name) {
-				acceptor.accept(createCompletionProposal(name, context))
-			}
-		}
-	}
-	
-	override completeEmit_Name(EObject model, Assignment assignment, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
-		super.completeEmit_Name(model, assignment, context, acceptor)
-		for (element : context.resource.allContents.filter(Dcl_ext0).toIterable) {
-			for (name : element.name) {
-				acceptor.accept(createCompletionProposal(name, context))
-			}
-		}
-		for (element : context.resource.allContents.filter(Dcl_int).toIterable) {
-			for (name : element.name) {
-				acceptor.accept(createCompletionProposal(name, context))
-			}
-		}
-	}
-	
-	override completeEmit_Exp(EObject model, Assignment assignment, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
-		super.completeEmit_Exp(model, assignment, context, acceptor)
-		for (element : context.resource.allContents.filter(Dcl_ext0).toIterable) {
-			for (name : element.name) {
-				acceptor.accept(createCompletionProposal(name, context))
-			}
-		}
-		for (element : context.resource.allContents.filter(Dcl_int).toIterable) {
-			for (name : element.name) {
-				acceptor.accept(createCompletionProposal(name, context))
-			}
-		}
-	}
+//	override completeType_Type_cls_adt(EObject model, Assignment assignment, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
+//		super.completeType_Type_cls_adt(model, assignment, context, acceptor)
+//		for (element : context.resource.allContents.filter(Dcl_cls).toIterable) {
+//			acceptor.accept(createCompletionProposal(element.name, context))
+//		}
+//		for (element : context.resource.allContents.filter(Dcl_adt).toIterable) {
+//			acceptor.accept(createCompletionProposal(element.name, context))
+//		}
+//	}
+//	
+//	override completeAwaits_Name(EObject model, Assignment assignment, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
+//		super.completeAwaits_Name(model, assignment, context, acceptor)
+//		for (element : context.resource.allContents.filter(Dcl_ext0).toIterable) {
+//			for (name : element.name) {
+//				acceptor.accept(createCompletionProposal(name, context))
+//			}
+//		}
+//		for (element : context.resource.allContents.filter(Dcl_int).toIterable) {
+//			for (name : element.name) {
+//				acceptor.accept(createCompletionProposal(name, context))
+//			}
+//		}
+//	}
+//	
+//	override completeEmit_Name(EObject model, Assignment assignment, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
+//		super.completeEmit_Name(model, assignment, context, acceptor)
+//		for (element : context.resource.allContents.filter(Dcl_ext0).toIterable) {
+//			for (name : element.name) {
+//				acceptor.accept(createCompletionProposal(name, context))
+//			}
+//		}
+//		for (element : context.resource.allContents.filter(Dcl_int).toIterable) {
+//			for (name : element.name) {
+//				acceptor.accept(createCompletionProposal(name, context))
+//			}
+//		}
+//	}
+//	
+//	override completeEmit_Exp(EObject model, Assignment assignment, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
+//		super.completeEmit_Exp(model, assignment, context, acceptor)
+//		for (element : context.resource.allContents.filter(Dcl_ext0).toIterable) {
+//			for (name : element.name) {
+//				acceptor.accept(createCompletionProposal(name, context))
+//			}
+//		}
+//		for (element : context.resource.allContents.filter(Dcl_int).toIterable) {
+//			for (name : element.name) {
+//				acceptor.accept(createCompletionProposal(name, context))
+//			}
+//		}
+//	}
 	
 	
 }
