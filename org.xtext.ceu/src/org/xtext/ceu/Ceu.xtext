@@ -38,7 +38,7 @@ Dcl_var:
 	'var' type=Type name=ID_VAR 
 	( 
 		dcl_var_org=Dcl_var_org
-	| 	=>dcl_var_plain=Dcl_var_plain
+	| 	dcl_var_plain=Dcl_var_plain
 	| 	dcl_var_plain_set=Dcl_var_plain_set
 	)?
 	
@@ -267,7 +267,7 @@ Await:
 	'await' (awaits=Awaits ('until' exp=Exp)? | {AwaitN} 'FOREVER')
 ;
 Awaits:
-	=>(=>wclockk=WCLOCKK | wclocke=WCLOCKE) | name=ID_EXT_TAG | exp=Exp
+	=>(=>wclockk=WCLOCKK | wclocke=WCLOCKE) | exp=Exp // | name=ID_EXT_TAG
 ;
 Emit:
 	( 	('call/rec'|'call'|'request') (=>wclockk=WCLOCKK | wclocke=WCLOCKE) ) 
@@ -401,7 +401,7 @@ Raw:
 Type:
 	(		
 			type_prim=Types 
-		|	type_cls_adt=ID_CLS_ADT		//combines types ID_cls and ID_adt
+		|	type_cls_adt=[Stmt|ID_CLS_ADT]		//combines types ID_cls and ID_adt
 		|	type_nat=ID_NAT
 	) 
 	('&' | '&&' | '?' | '[' (exp+=Exp)? ']')*
@@ -499,14 +499,15 @@ Exp12:
 ;
 Prim: 
 	'(' exp+=Exp ')'
-	|	Sizeof
-	|	var=ID_VAR	|	nat=ID_NAT	|	def=ID_EXT_TAG	|	cls=ID_CLS_ADT
+	|	Sizeof |	def+=[Dcl_ext1|ID_EXT_TAG]
+	|	var+=[StmtVar|ID_VAR_TERMINAL]	|	nat=ID_NAT		|	cls=[StmtB|ID_CLS_ADT]
 	|	Null		|	Number	|	{String} STRING
 	|	Global 		|	This	|	Outer
 	|	=>RawStmt	|	=>Vector_constr
 	|	'call' Exp
 	|	'call/rec' Exp
 ;
+
 Cast:
 	type=Type | cast=('@nohold' | '@plain' | '@pure')
 ;
@@ -545,7 +546,8 @@ LstStmtB:
 ;
 StmtS:
 		Nothing 
-	| 	Dcl_var		| 	Dcl_pool | 	Dcl_int
+	| 	Dcl_pool
+	|	StmtVar
 	// 	Dcl_fun => Dcl_fun_do & Dcl_ext0 => Dcl_ext1 	>> in StmtB
 	|	Dcl_nat		| 	Dcl_det
 	|	=>Set
@@ -555,6 +557,9 @@ StmtS:
 	|	DoOrg
 	|	=>RawStmt
 	| 	CallStmt
+;
+StmtVar:
+	Dcl_var | Dcl_int
 ;
 StmtB:
 		Dcl_fun_do 			|	Dcl_ext1
