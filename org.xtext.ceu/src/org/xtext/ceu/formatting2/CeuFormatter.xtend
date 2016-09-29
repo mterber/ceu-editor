@@ -25,6 +25,7 @@ import org.xtext.ceu.ceu.Root
 import org.xtext.ceu.ceu.Stmt
 import org.xtext.ceu.services.CeuGrammarAccess
 import org.xtext.ceu.ceu.Finalize
+import org.xtext.ceu.ceu.CeuPackage
 
 class CeuFormatter extends AbstractFormatter2 {
 
@@ -80,21 +81,25 @@ class CeuFormatter extends AbstractFormatter2 {
 	}
 
 	/*		Class/Organism		*/
-	def dispatch void format(Dcl_cls d, extension IFormattableDocument document) {
+	def dispatch void format(Dcl_cls d, 
+		extension IFormattableDocument document
+	) {
 
 		d.regionFor.keyword("class").append[oneSpace]
-		d.regionFor.keyword("class").nextSemanticRegion.prepend[oneSpace].append[newLine]
+//		d.regionFor.keyword("class").nextSemanticRegion.prepend[oneSpace].append[newLine]
+		d.regionFor.feature(CeuPackage.Literals.DCL_CLS__NAME).surround[oneSpace].append[newLine]
 		d.regionFor.keyword("with").append[newLine]
+		
 		d.blockI.format
-		d.^do.regionFor.keyword("do").append[newLine].prepend[newLine]
-		d.^do.format
-		d.^do.regionFor.keyword("end").append[newLine].prepend[newLine]
-		d.blockI.prepend[indent]
 		interior(
 			d.regionFor.keyword("with"),
 			d.^do.regionFor.keyword("do"),
 			[indent]
 		)
+		
+		d.^do.regionFor.keyword("do").append[newLine].prepend[newLine]
+		d.^do.format
+		d.^do.regionFor.keyword("end").append[newLine].prepend[newLine]		
 	}
 
 	/*		Interface-Block		*/
