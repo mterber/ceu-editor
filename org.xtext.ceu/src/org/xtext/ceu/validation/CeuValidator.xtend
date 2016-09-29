@@ -3,6 +3,10 @@
  */
 package org.xtext.ceu.validation
 
+import org.eclipse.xtext.validation.Check
+import org.xtext.ceu.ceu.Dcl_var
+import org.xtext.ceu.ceu.Dcl_var_plain_set
+import org.xtext.ceu.ceu.CeuPackage
 
 /**
  * This class contains custom validation rules. 
@@ -21,5 +25,21 @@ class CeuValidator extends AbstractCeuValidator {
 //					INVALID_NAME)
 //		}
 //	}
+	@Check
+	def checkIfVarsAreInitialized(Dcl_var d) {
+		val referenceBlockI = d.type.type_cls_adt.eContents.get(0).eContents
+//		var notInitializedVars = 0;
+		for (vars : referenceBlockI) {
+//			notInitializedVars++
+			if (vars instanceof Dcl_var) {
+				for (Varsets : vars.eContents) {
+					if (Varsets instanceof Dcl_var_plain_set && d.dcl_var_org == null) {
+						warning("Variables of Organism < > are not initialized", CeuPackage.Literals.DCL_VAR__DCL_VAR_ORG)
+					}
+				}
+			}
+		}
+		
+	}
 	
 }
