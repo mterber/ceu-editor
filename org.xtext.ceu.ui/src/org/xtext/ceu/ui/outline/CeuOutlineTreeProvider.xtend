@@ -87,6 +87,7 @@ import org.xtext.ceu.ceu.Dcl_ext1
 import org.xtext.ceu.services.CeuGrammarAccess.LuaBlockElements
 import org.xtext.ceu.ceu.StmtS
 import javax.print.attribute.standard.DocumentName
+import org.xtext.ceu.ceu.CeuPackage
 
 /**
  * Customization of the default outline structure.
@@ -200,7 +201,7 @@ class CeuOutlineTreeProvider extends DefaultOutlineTreeProvider {
 	/* Dcl_var */
 	def dispatch isLeaf(Dcl_var d) { true }
 	def dispatch Object text(Dcl_var d) {
-		return '(Var) ' + d.name + ': ' + returnTypeString(d)
+		return '(Var) ' + d.name //+ ': ' + returnTypeString(d)
 	}
 	
 	/* Dcl_cls */
@@ -220,18 +221,18 @@ class CeuOutlineTreeProvider extends DefaultOutlineTreeProvider {
 	}
 	
 	def String returnTypeString(Dcl_var d) {
-		if (d.type.type_prim == null) {
-			if (d.type.type_cls_adt == null) {
-				if (d.type.type_nat == null) {
-					"unknown Type"
-				} else {
-					d.type.type_nat
-				}
-			} else {
-				d.type.type_cls_adt
-			}
-		} else {
-			d.type.type_prim.name
-		}
+//		if (d.type.type_prim == null) {
+//			if (d.type.type_cls_adt == null) {
+//				if (d.type.type_nat == null) {
+//					"unknown Type"
+//				} else {
+//					d.type.type_nat
+//				}
+//			} else {
+//				d.type.type_cls_adt
+//			}
+//		} else {
+//			d.type.type_prim.name
+//		}
 	}
 }
