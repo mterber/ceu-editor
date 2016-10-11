@@ -7,6 +7,10 @@ import org.eclipse.xtext.validation.Check
 import org.xtext.ceu.ceu.Dcl_var
 import org.xtext.ceu.ceu.Dcl_var_plain_set
 import org.xtext.ceu.ceu.CeuPackage
+import java.util.Map
+import org.xtext.ceu.ceu.BlockI
+import org.xtext.ceu.ceu.StmtB
+import java.util.HashMap
 
 /**
  * This class contains custom validation rules. 
@@ -25,21 +29,31 @@ class CeuValidator extends AbstractCeuValidator {
 //					INVALID_NAME)
 //		}
 //	}
+
+	public static var VarNameToOrganismMapper = new HashMap<String, StmtB>
+
+	public static val VARS_NOT_INITIALIZED = "VARS_NOT_INITIALIZED"
+
 	@Check
 	def checkIfVarsAreInitialized(Dcl_var d) {
-		val referenceBlockI = d.type.type_cls_adt.eContents.get(0).eContents
-//		var notInitializedVars = 0;
-		for (vars : referenceBlockI) {
-//			notInitializedVars++
+		val referenceBlockI = d.type.type_cls_adt.eContents.get(0)
+		var notInitializedVars = 0;
+		for (vars : referenceBlockI.eContents) {
+			notInitializedVars++
 			if (vars instanceof Dcl_var) {
 				for (Varsets : vars.eContents) {
-					if (Varsets instanceof Dcl_var_plain_set && d.dcl_var_org == null) {
-						warning("Variables of Organism < > are not initialized", CeuPackage.Literals.DCL_VAR__DCL_VAR_ORG)
+					if (Varsets instanceof Dcl_var_plain_set) {
+						notInitializedVars--
 					}
 				}
 			}
 		}
 		
+		if (notInitializedVars > 0 && d.dcl_var_org == null) {
+			VarNameToOrganismMapper.put(d.name, d.type.type_cls_adt)
+			warning("Variables of the instantiated Organism are not initialized", 
+					CeuPackage.Literals.DCL_VAR__DCL_VAR_ORG,
+					VARS_NOT_INITIALIZED)
+		}
 	}
-	
 }
