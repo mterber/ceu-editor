@@ -18,34 +18,34 @@ class CeuSyntaxErrorMessageProvider extends SyntaxErrorMessageProvider {
 
 	override getSyntaxErrorMessage(IParserErrorContext context) {
 		val unexpectedText = context?.recognitionException?.token?.text
-		println('''
-		RecognitionException:
-		recognition: 	«context.recognitionException.toString»
-		''')
-		if (context.currentNode.semanticElement.eClass.name == "Dcl_var") {
-			var i = 0;
-			println("Dcl_var")
-			for (nodes : context.currentNode.parent.leafNodes) {
-				println('''
-				«i++»: «nodes.semanticElement.eClass.name»
-				''')
-			}
-		}
-
-//		if (context.currentNode.semanticElement.eClass.name == "Dcl_var" // ID_VAR_TERMINAL abfragen
-//			&& context?.currentNode?.previousSibling?.semanticElement.eClass.name == "Type"
-//		) {
-//			if (!(Character.isLetter(unexpectedText.charAt(0))) && !(unexpectedText.startsWith("_"))) {
-//				return new SyntaxErrorMessage(
-//					"Identifier have to start with a letter or '_'!",
-//					IDENTIFIER_STARTS_NOT_WITH_LETTER
-//				)
+//		println('''
+//		RecognitionException:
+//		recognition: 	ï¿½context.recognitionException.toStringï¿½
+//		''')
+//		if (context.currentNode.semanticElement.eClass.name == "Dcl_var") {
+//			var i = 0;
+//			println("Dcl_var")
+//			for (nodes : context.currentNode.parent.leafNodes) {
+//				println('''
+//				ï¿½i++ï¿½: ï¿½nodes.semanticElement.eClass.nameï¿½
+//				''')
 //			}
-//			return new SyntaxErrorMessage(
-//				"Identifiers for variables have to start with a lower case!",
-//				INVALID_VAR_IDENTIFIER
-//			)
 //		}
+
+		if (context.currentNode.semanticElement.eClass.name == "Dcl_var" // ID_VAR_TERMINAL abfragen
+			&& context?.currentNode?.previousSibling?.semanticElement.eClass.name == "Type"
+		) {
+			if (!(Character.isLetter(unexpectedText.charAt(0))) && !(unexpectedText.startsWith("_"))) {
+				return new SyntaxErrorMessage(
+					"Identifier have to start with a letter or '_'!",
+					IDENTIFIER_STARTS_NOT_WITH_LETTER
+				)
+			}
+			return new SyntaxErrorMessage(
+				"Identifiers for variables have to start with a lower case!",
+				INVALID_VAR_IDENTIFIER
+			)
+		}
 //		if (context.currentNode.semanticElement.eClass.name == "Dcl_int"
 //			&& context?.currentNode?.previousSibling?.semanticElement.eClass.name == "Type"
 //		) {
