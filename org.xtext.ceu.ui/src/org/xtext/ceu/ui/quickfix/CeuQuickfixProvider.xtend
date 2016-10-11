@@ -8,6 +8,11 @@ import org.eclipse.xtext.ui.editor.quickfix.Fix
 import org.eclipse.xtext.ui.editor.quickfix.IssueResolutionAcceptor
 import org.eclipse.xtext.validation.Issue
 import org.xtext.ceu.validation.CeuSyntaxErrorMessageProvider
+import org.xtext.ceu.validation.CeuValidator
+import org.eclipse.xtext.ui.editor.model.XtextDocumentProvider.UnchangedElementListener
+import org.xtext.ceu.ceu.Dcl_var_plain_set
+import org.xtext.ceu.ceu.Dcl_var
+import org.xtext.ceu.ceu.CeuPackage
 
 /**
  * Custom quickfixes.
@@ -53,6 +58,36 @@ class CeuQuickfixProvider extends DefaultQuickfixProvider {
 			val xtextDocument = context.xtextDocument
 			val firstLetter = xtextDocument.get(issue.offset, 1)
 			xtextDocument.replace(issue.offset, 1, firstLetter.toUpperCase)
+		]
+	}
+	@Fix(CeuValidator.VARS_NOT_INITIALIZED)
+	def initializeVars(Issue issue, IssueResolutionAcceptor acceptor) {
+		acceptor.accept(issue, 'initialize variables', 'initialize the variables of organism', 'default.png') [
+			context |
+			val xtextDocument = context.xtextDocument
+//			var varsOfOrgasnism = new StringBuilder;
+			val newOffset = issue.offset + issue.length
+			
+//			val nameOfVar = xtextDocument.get(issue.offset,issue.length).split(" ").get(2)
+//			
+//			val refToOrganism = CeuValidator.VarNameToOrganismMapper.get(nameOfVar)
+//			val referenceBlockI = refToOrganism.eContents.get(0)
+//			for (vars : referenceBlockI.eContents) {
+//				if (vars instanceof Dcl_var) {
+//					for (VarSet : vars.eContents) {
+//						if (VarSet instanceof Dcl_var_plain_set) {
+//							varsOfOrgasnism.append(VarSet.eClass.name+"\n")
+//						}
+//					}
+//				}
+//			}
+			
+			val replacementString = '''
+			 with
+			 	// initialize Variables here
+			end'''
+			
+			xtextDocument.replace(newOffset, 0, replacementString)
 		]
 	}
 
