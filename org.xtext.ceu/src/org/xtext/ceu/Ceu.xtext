@@ -1,9 +1,636 @@
+/**
+ * Ceu-grammar version:
+ * https://github.com/fsantanna/ceu/commit/b37bca095bd7f079f20d13068e298a5dc8b5946d
+ * 
+ */
+
 grammar org.xtext.ceu.Ceu with org.eclipse.xtext.common.Terminals
 
 generate ceu "http://www.xtext.org/ceu/Ceu"
 
-Model:
-	greetings+=Greeting*;
+Root:
+	stmt+=Stmt*
+;
+Nothing:
+	name='nothing'
+;
+Escape:
+	'escape' exp=Exp
+;
+Return:
+	{Return} 'return' (exp=Exp)?
+;
+Break:
+	{Break}'break'
+;
+Continue:
+	{Continue} 'continue'
+;
+
+/*------------------------------------------------------------------------- */
+/*									Declarations							*/
+/*------------------------------------------------------------------------- */
+
+Dcl_var:
+	/*	(non-LL(*) decision due to recursive rule invocation)
+	 * 	-> need to differ from parser.lua
+	 */
+	'var' type=Type name=ID_VAR 
+	( 
+		dcl_var_org=Dcl_var_org
+	| 	dcl_var_plain=Dcl_var_plain
+	| 	dcl_var_plain_set=Dcl_var_plain_set
+	)?
 	
-Greeting:
-	'Hello' name=ID '!';
+;
+Dcl_var_org: 
+	(		('with' dcl_constr=Dcl_constr 'end')
+		|	'=' var_constr=Var_constr ('with' dcl_constr=Dcl_constr 'end')?
+	)
+;
+Dcl_var_plain_set:
+	dcl_var_set+=Dcl_var_set (',' dcl_var_set+=Dcl_var_set)* 
+;
+Dcl_var_plain:
+	(',' name+=ID_VAR)+
+;
+Var_constr:
+	cls=[Dcl_cls|ID_CLS_ADT] '.' var=[Dcl_var|ID_VAR] '(' expList=ExpList ')'
+;
+Dcl_constr:
+	Block
+;
+Dcl_var_set:
+	sets=Sets
+;
+Dcl_pool:
+	'pool' type=Type name=ID_VAR 
+	(dcl_var_set+=Dcl_var_set (',' dcl_var_set+=Dcl_var_set)*)?
+;
+Dcl_int:
+	'event' (tupletype=TupleType_1 | type=Type) name+=ID_VAR (',' name+=ID_VAR)*
+;
+Dcl_fun:
+	'function' ('@rec')? tupletype=TupleType_2 '=>' type=Type name=ID_VAR
+;
+Dcl_fun_do:
+	dcl_fun=Dcl_fun (';' | do=Do)
+;
+Dcl_ext_call:
+	('@rec')?
+	tupletype=TupleType_2 '=>' type=Type name+=ID_EXT_TAG (',' name+=ID_EXT_TAG)*
+;
+Dcl_ext0:
+	Dcl_ext_io | ( ('input'|'output') (=>Dcl_ext_call | Dcl_ext_evt) )
+;
+Dcl_ext1:
+	dcl_ext=Dcl_ext0 (do=Do | ';')
+;
+Dcl_ext_evt:
+	(tupletype=TupleType_1 | type=Type)
+	name+=ID_EXT_TAG (',' name+=ID_EXT_TAG)*
+;
+Dcl_ext_io:
+	('input/output'|'output/input')
+	('[' (exp=Exp)? ']')?
+	tupletype=TupleType_2 '=>' type=Type
+	name+=ID_EXT_TAG (',' name+=ID_EXT_TAG)*
+;
+
+Dcl_cls:
+	'class' name=ID_CLS_ADT 
+	'with'
+		blockI=BlockI
+	do=Do
+;
+
+/*------------------------------------------------------------------------- */
+/*							classes / interfaces							*/
+/*------------------------------------------------------------------------- */
+
+BlockI:
+	{BlockI} 
+	((	dcl_var+=Dcl_var 
+	| 	dcl_int+=Dcl_int 
+	| 	dcl_pool+=Dcl_pool 
+	| 	dcl_fun+=Dcl_fun 
+	|	dcl_imp+=Dcl_imp
+	)	';')*
+;
+Dcl_ifc:
+	'interface' name=ID_CLS_ADT 'with' blockI=BlockI 'end'
+;
+Dcl_imp:
+	'interface' name+=ID_CLS_ADT (',' name+=ID_CLS_ADT)*
+;
+Dcl_adt:
+	'data' name=ID_CLS_ADT 'with'
+		(adt_struct=Dcl_adt_struct | adt_union=Dcl_adt_union)
+	'end'
+;
+Dcl_adt_struct:
+	('var' type+=Type name+=ID_VAR (dcl_var_plain+=Dcl_var_plain)? ';')+
+;
+Dcl_adt_union:
+	dcl_adt_tag+=Dcl_adt_tag ('or' dcl_adt_tag+=Dcl_adt_tag)*
+;
+Dcl_adt_tag:
+	'tag' name=ID_EXT_TAG 
+	('with' 
+		( 'var' type+=Type var+=ID_VAR (dcl_var_plain+=Dcl_var_plain)? ';' )*
+	'end'
+	| ';')
+;
+Dcl_nat:
+	'native' ('@pure'|'@const'|'@nohold'|'@plain')?
+	dcl_nat+=Dcl_nat2 (',' dcl_nat+=Dcl_nat2)*
+;
+Dcl_nat2:
+		name=ID_NAT ('=' INT | '()')?
+;
+Host_c:
+	('native' | 'native/pre') 'do' b=BlockC 'end'
+;
+
+BlockC:
+	(ID | ID_VAR | ID_EXT_TAG | ID_NAT | ID_CLS_ADT | INT | STRING | ANY_OTHER | C_Types 
+	| '(' | ')' | '[' | ']' | '{' | '}' | '()' | '_'
+	| PREPROCESSOR_DEFINE_TYPE | PREPROCESSOR_INCLUDE_TYPE | PREPROCESSOR_SINGLE_PARAM_TYPE
+	| '=' | '==' | '<' | '<=' | '>' | '>=' | '>>' | '<<' | ',' | '.'
+	| '+' | '-' | '/' | '*' | ';' | '%' | '$' | '?' | '!'
+	| '&' | '|' | '^'
+	)*
+;
+
+C_Types:
+		'bool' 	| 	'byte' 	| 	'char'	|	'f32'	|	'f64'   
+	|	'float' | 	'int'   | 	's16'   | 	's32'   | 	's64'   
+	| 	's8'    | 	'u16' 	| 	'u32'   | 	'u64'   | 	'u8'
+	|	'uint'	| 	'void'  | 	'word'
+	// C Keywords
+	|	 'auto'	|	'break'	|	'case'	|	'const'
+	|	'continue' | 'default' | 'do' | 'double' | 'else' | 'enum' | 'extern'
+	| 	'for' | 'goto' | 'if' | 'long' | 'register'
+	|	'return' | 'short' | 'signed' | 'sizeof' | 'static' | 'struct'
+	|	'switch' | 'typedef' | 'union' | 'unsigned' | 'volatile'
+	|	'while'
+;
+Dcl_det:
+	'@safe' name+=ID_det 
+		('with' name+=ID_det (',' name+=ID_det)* )?
+;
+ID_det:
+	ID_NAT | ID_EXT_TAG | ID_VAR
+;
+
+/*------------------------------------------------------------------------- */
+/*								Assignments									*/
+/*------------------------------------------------------------------------- */
+Set:
+	(exp=Exp | =>varlist=VarList) sets=Sets
+;
+Sets:
+	('=' | ':=')
+	(	SetBlock 
+	| 	Await
+	|	Emit
+	|	Adt_constr_root
+	|	Lua
+	|	=>DoOrg
+	|	Spawn
+	|	Thread
+	|	=>Exp
+	|	Traverse
+	)
+;
+
+Lua:
+	'[[' lua=LuaBlock ']]'
+;
+
+LuaBlock:
+	(ID | ID_VAR | ID_EXT_TAG | ID_NAT | ID_CLS_ADT | INT | STRING | ANY_OTHER | Lua_Keys 
+	| '(' | ')' | '[' | ']' | '{' | '}' | '()' | '_'
+	| '=' | '=='| '~='| '<' | '<='| '>' | '>=' | '>>' | '<<' | ',' | '.' | '..' | '...'
+	| '+' | '-' | '/' | '*' | ';'
+	| '#' | '^' | ':' | '%'	| '!' | '$'
+	| '&' | '|'
+	)*
+;
+
+Lua_Keys:
+		'and' 		| 'break' 	| 'do' 	| 'else' 	| 'elseif' 
+	| 	'end' 		| 'false' 	| 'for' | 'function'| 'if' 
+	|	'in'  		|	'local'	| 'nil' | 'not' 	| 'or'
+	|	'repeat'	| 'return'	| 'then'| 'true' 	| 'until' | 'while'
+;
+SetBlock:
+	Do | If  | Loop | Every | Par
+;
+
+Adt_constr_root:
+	('new')? Adt_constr_one
+;
+Adt_constr_one:
+	adt=Adt '(' adt_explist=Adt_explist ')'
+;
+Adt:
+	name=ID_CLS_ADT ('.' tag=ID_EXT_TAG)?
+;
+Adt_expitem:
+	Adt_constr_one | Exp
+;
+Adt_explist:
+	{Adt_explist} ( expitem+=Adt_expitem (',' expitem+=Adt_expitem)* )?
+;
+
+Vector_tup:
+	'[' e=ExpList ']'
+;
+Vector_constr:
+	(vec+=Vector_tup) ('..' (vec+=Vector_tup | exp+=Exp) )*
+;
+
+/*------------------------------------------------------------------------- */
+/*								Function calls								*/
+/*------------------------------------------------------------------------- */
+
+CallStmt:
+	Exp
+;
+
+/*------------------------------------------------------------------------- */
+/*								Event handling								*/
+/*------------------------------------------------------------------------- */
+
+Await:
+	'await' (awaits=Awaits ('until' exp=Exp)? | {AwaitN} 'FOREVER')
+;
+Awaits:
+	=>(=>wclockk=WCLOCKK | wclocke=WCLOCKE) | exp=Exp // | name=ID_EXT_TAG
+;
+Emit:
+	( 	('call/rec'|'call'|'request') (=>wclockk=WCLOCKK | wclocke=WCLOCKE) ) 
+	| 	('emit' (	=>(=>wclockk=WCLOCKK | wclocke=WCLOCKE) 
+				| 	exp=Exp emit=Emit_ps))
+	|	(name=ID_EXT_TAG emit=Emit_ps )
+;
+Emit_ps:
+	{Emit_ps} ('=>' (exp=Exp | =>'(' explist=ExpList ')') )?
+;
+/*------------------------------------------------------------------------- */
+/*							Organism instantiation							*/
+/*------------------------------------------------------------------------- */
+
+DoOrg:
+	'do' cls=[Dcl_cls|ID_CLS_ADT] 
+	(spawn_const=Spawn_constr)?
+	('with' dcl_constr=Dcl_constr 'end')?
+;
+Spawn:
+	'spawn' 
+	(
+		do=Do 
+		|
+		{Spawn}
+		(	(spawn_constr=Spawn_constr)? 
+			('in' exp=Exp)?
+			('with' dcl_constr=Dcl_constr 'end')?
+			';'
+		)
+	)
+;
+Spawn_constr:
+	'.' name=ID_VAR '(' explist=ExpList ')'
+;
+Kill:
+	'kill' exp+=Exp ('=>' exp+=Exp)?
+;
+
+/*------------------------------------------------------------------------- */
+/*								Flow control								*/
+/*------------------------------------------------------------------------- */
+Do:
+	'do'
+		block=Block
+	'end'
+;
+Block:
+	{Block} (stmt+=Stmt)*
+;
+DoPre:
+	'pre' Do
+;
+If:
+	'if' exp+=Exp 'then' 
+	block+=Block
+	('else/if' exp+=Exp 'then' block+=Block)*
+	('else' block+=Block)?
+	'end'
+;
+Loop:
+	'loop' ('/' exp=Exp)?
+	( var=ID_VAR ('in' exp_in=Exp)? )?
+	do=Do
+;
+Every:
+	'every' (( ID_VAR | VarList ) 'in' )?
+	awaits=Awaits
+	do=Do
+;
+Traverse:
+	'traverse' (TraverseLoop | TraverseRec)
+;
+TraverseLoop:
+	var=[Dcl_var|ID_VAR] 'in' (=>'[' exp=Exp ']' | exp=Exp)
+	('with' blockI=BlockI)?
+	do=Do
+;
+TraverseRec:
+	('/' INT )? exp=Exp 
+	('with' block=Block 'end' | ';')
+;
+Finalize:
+	'finalize' (set=Set ';')?
+	'with' 
+		finally=Finally 
+	'end'
+;
+Finally:
+	Block
+;
+Par:
+	('par'|'par/and'|'par/or') 'do' 
+		block+=Block 
+		('with' block+=Block)+
+	'end'
+;
+Watching:
+	'watching' 
+	( (name=ID_VAR | varlist=VarList) 'in' )?
+	awaits=Awaits
+	do=Do
+;
+Pause:
+	'pause/if' exp=Exp do=Do
+;
+
+Async:
+	'async' (varlist=VarList)? do=Do
+;
+Thread:
+	'async/thread' (varlist=VarList)? do=Do
+;
+Isr:
+	'async/isr' '[' explist=ExpList ']' (varlist=VarList)? do=Do
+;
+Atomic:
+	'atomic' Do
+;
+
+RawStmt:
+	'{' raw=Raw '}'
+;
+Raw:
+	{Raw} (ANY_OTHER | ('{' raw+=Raw '}')*)
+;
+
+/*------------------------------------------------------------------------- */
+/*								Types										*/
+/*------------------------------------------------------------------------- */
+Type:
+	(		
+			type_prim=Types 
+		|	type_cls_adt=[Stmt|ID_CLS_ADT]		//combines types ID_cls and ID_adt
+		|	type_nat=ID_NAT
+	) 
+	('&' | '&&' | '?' | '[' (exp+=Exp)? ']')*
+;
+/*------------------------------------------------------------------------- */
+/*								Lists										*/
+/*------------------------------------------------------------------------- */
+VarList:
+	'(' name+=ID_VAR (',' name+=ID_VAR)* ')'
+;
+ExpList:
+	{ExpList} ( exp+=Exp (',' exp+=Exp)* )?
+;
+TupleTypeItem_1:
+	Type
+;
+TupleType_1:
+	'(' tupletypeitem+=TupleTypeItem_1 (',' tupletypeitem+=TupleTypeItem_1)* ')'
+;
+TupleTypeItem_2:
+	('@hold')? type=Type (name=ID_VAR)? 
+;
+TupleType_2:
+	'(' tupletypeitem+=TupleTypeItem_2 (',' tupletypeitem+=TupleTypeItem_2)* ')'
+;
+/*------------------------------------------------------------------------- */
+/*							Wall-clock values								*/
+/*------------------------------------------------------------------------- */
+WCLOCKK:
+	(INT 'h')? (INT 'min')? (INT 's')? (INT 'ms')? (INT 'us')? ('_')?
+;
+
+WCLOCKE:
+	exp=Exp ('h' | 'min' | 's' | 'ms' | 'us') ('_')?
+;
+
+/*------------------------------------------------------------------------- */
+/*								Expression									*/
+/*------------------------------------------------------------------------- */
+
+Exp:
+	Exp0
+;
+Exp0:
+	Exp1
+;
+Exp1:
+	left=Exp2 ('or' right+=Exp2)*
+;
+Exp2:
+	left=Exp3 ('and' right+=Exp3)*
+;
+Exp3:
+	left=Exp4 ( ( '!=' | '==' | '<=' | '>=' | '<' | '>' ) right+=Exp4)*
+;
+Exp4:
+	left=Exp5 ('|' right+=Exp5)*
+;
+Exp5:
+	left=Exp6 ('^' right+=Exp6)*
+;
+Exp6:
+	left=Exp7 ('&' right+=Exp7)*
+;
+Exp7:
+	left=Exp8 ( ('>>' | '<<') right+=Exp8)*
+;
+Exp8:
+	left=Exp9 ( ('+'|'-') right+=Exp9)*
+;
+Exp9:
+	left=Exp10 ( ( ('*' | '/') | '%') right+=Exp10)*
+;
+Exp10:
+	('not' | '-' | '+' | '~' | '*' | '&&' | '&' | '$$' | '$' | '(' cast+=Cast ')')*
+	expr=Exp11
+;
+Exp11:
+	left=Exp12 
+	(
+		(
+			'()' |	//	Workaround for empty round brackets Issue (#25)
+					//	consider for possibly occuring problems later..
+			'(' expList+=ExpList ')' 
+			('finalize' 'with' finally+=Finally 'end' )?
+		)
+		|	'[' exp+=Exp ']' 
+		|	(':' | '.') field+=(ID_VAR | ID_NAT | ID_CLS_ADT | ID_EXT_TAG )
+		|	'?'
+		|	'!'
+	)*
+;
+Exp12:
+	Prim
+;
+Prim: 
+	'(' exp+=Exp ')'
+	|	Sizeof |	def+=[Dcl_ext1|ID_EXT_TAG]
+	|	var+=[StmtVar|ID_VAR_TERMINAL]	|	nat=ID_NAT		|	cls=[StmtB|ID_CLS_ADT]
+	|	Null		|	Number	|	{String} STRING
+	|	Global 		|	This	|	Outer
+	|	=>RawStmt	|	=>Vector_constr
+	|	'call' Exp
+	|	'call/rec' Exp
+;
+
+Cast:
+	type=Type | cast=('@nohold' | '@plain' | '@pure')
+;
+Sizeof:
+	'sizeof' '(' (Type | Exp) ')'
+;
+Null:
+	{Null} 'null'
+;
+Number:
+	{Number} ( =>(INT ('.' INT)?) | HEX  | 'true' | 'false' )
+;
+Global:
+	{Global} 'global'
+;
+This:
+	{This} 'this'
+;
+Outer:
+	{Outer} 'outer'
+;
+
+/*------------------------------------------------------------------------- */
+/*								Statements	 								*/
+/*------------------------------------------------------------------------- */
+Stmt:
+		(StmtS ';' | StmtB)
+	| 	(LstStmt ';' | LstStmtB)
+;
+
+LstStmt:
+	Escape | Return | Break | Continue
+;
+LstStmtB:
+	Par
+;
+StmtS:
+		Nothing 
+	| 	Dcl_pool
+	|	StmtVar
+	// 	Dcl_fun => Dcl_fun_do & Dcl_ext0 => Dcl_ext1 	>> in StmtB
+	|	Dcl_nat		| 	Dcl_det
+	|	=>Set
+	|	Await		| 	Emit	//	<= Emit includes EmitExt & EmitInt
+	|	Kill					//	moved 'Spawn' to StmtB due to left-factoring
+	//	included 'TraverseRec' into Traverse(StmtB) due to left-factoring
+	|	DoOrg
+	|	=>RawStmt
+	| 	CallStmt
+;
+StmtVar:
+	Dcl_var | Dcl_int
+;
+StmtB:
+		Dcl_fun_do 			|	Dcl_ext1
+	|	Dcl_ifc	|	Dcl_cls	|	Dcl_adt
+	|	Host_c
+	|	Do		|	If
+	|	Loop	|	Every	|	Traverse	//Traverse includes -Loop/-Rec
+	|	Spawn
+	|	Finalize
+	|	Watching
+	|	Pause
+	|	Async	|	Thread	|	Isr		|	Atomic
+	|	DoPre
+	|	Lua
+	|	PreProc
+;
+
+Types:
+	name=(
+		'bool' 	| 	'byte' 	| 	'char'	|	'f32'	|	'f64'   
+	|	'float' | 	'int'   | 	's16'   | 	's32'   | 	's64'   
+	| 	's8'    | 	'u16' 	| 	'u32'   | 	'u64'   | 	'u8'    
+	|	'uint'	| 	'void'  | 	'word'
+	)
+;
+
+ID_VAR:
+	ID_VAR_TERMINAL | 'h' | 'min' | 's' | 'ms' | 'us'
+;
+
+terminal ID_VAR_TERMINAL:
+	(('a'..'z') ('a'..'z' | 'A'..'Z' | '0'..'9' | '_')*) | '_'
+;
+terminal ID_EXT_TAG:
+	('A'..'Z') ('A'..'Z' | '0'..'9' | '_')*
+;
+terminal ID_CLS_ADT:
+	('A'..'Z') ('a'..'z' | 'A'..'Z' | '0'..'9' | '_')*
+;
+terminal ID_NAT:
+	'_' ('a'..'z' | 'A'..'Z' | '0'..'9' | '_')+
+;
+terminal HEX:		//Used in Rule: Number
+	('0' ('x'|'X') ('0'..'9'|'A'..'F'|'a'..'f')*)
+;
+
+/*------------------------------------------------------------------------- */
+/*								PreProcessor 								*/
+/*------------------------------------------------------------------------- */
+PreProc:
+    type=PREPROCESSOR_INCLUDE_TYPE | 
+    type=PREPROCESSOR_DEFINE_TYPE | 
+    type=PREPROCESSOR_SINGLE_PARAM_TYPE
+;
+
+terminal PREPROCESSOR_INCLUDE_TYPE: 
+		'#include'	->	'\n'
+	| 	'#import'	->	'\n'
+;
+
+terminal PREPROCESSOR_DEFINE_TYPE: '#define' -> '\n';
+
+terminal PREPROCESSOR_SINGLE_PARAM_TYPE: 
+		'#undef'->'\n'
+	|	('#ifdef'|'#ifndef') -> '\n' 
+	|	'#pragma'->'\n'
+	|	'#endif'
+;
+
+/*------------------------------------------------------------------------- */
+// this was added to fix highlighting problems with par | par/or | par/and
+terminal UNUSED:
+	'par' '/'
+;

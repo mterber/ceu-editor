@@ -3,9 +3,14 @@
  */
 package org.xtext.ceu
 
+import org.eclipse.xtext.parser.antlr.ISyntaxErrorMessageProvider
+import org.xtext.ceu.validation.CeuSyntaxErrorMessageProvider
 
 /**
  * Use this class to register components to be used at runtime / without the Equinox extension registry.
  */
 class CeuRuntimeModule extends AbstractCeuRuntimeModule {
+	def Class<? extends ISyntaxErrorMessageProvider> bindISyntaxErrorMessageProvider() {
+		return CeuSyntaxErrorMessageProvider
+	}
 }
