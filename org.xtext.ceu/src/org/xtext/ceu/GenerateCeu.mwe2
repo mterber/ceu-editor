@@ -38,6 +38,9 @@ Workflow {
 				}
 			}
 			renameRefactoring = {}
+			formatter = {
+				generateStub = true
+			}
 		}
 	}
 }

@@ -25,5 +25,6 @@ Export-Package: org.xtext.ceu.generator,
  org.xtext.ceu.parser.antlr.internal,
  org.xtext.ceu.ceu.impl,
  org.xtext.ceu.serializer,
- org.xtext.ceu.validation
+ org.xtext.ceu.validation,
+ org.xtext.ceu.formatting2
 Import-Package: org.apache.log4j
