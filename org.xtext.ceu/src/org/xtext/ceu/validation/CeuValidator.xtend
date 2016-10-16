@@ -50,7 +50,7 @@ class CeuValidator extends AbstractCeuValidator {
 		}
 		
 		if (notInitializedVars > 0 && d.dcl_var_org == null) {
-			VarNameToOrganismMapper.put(d.name, d.type.type_cls_adt)
+			//VarNameToOrganismMapper.put(d.name, d.type.type_cls_adt)
 			warning("Variables of the instantiated Organism are not initialized", 
 					CeuPackage.Literals.DCL_VAR__DCL_VAR_ORG,
 					VARS_NOT_INITIALIZED)
