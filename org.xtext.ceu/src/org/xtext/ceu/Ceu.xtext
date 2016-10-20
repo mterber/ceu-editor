@@ -2,8 +2,51 @@ grammar org.xtext.ceu.Ceu with org.eclipse.xtext.common.Terminals
 
 generate ceu "http://www.xtext.org/ceu/Ceu"
 
-Model:
-	greetings+=Greeting*;
-	
-Greeting:
-	'Hello' name=ID '!';
+Root:
+	__Exp
+;
+
+
+/*
+ * Expressions
+ * --------------------------------------------------------
+ */
+__Exp:
+	__0
+;
+__0 returns __Exp:
+	__1 '..'?
+;
+__1 returns __Exp:
+	__2 ({__1.left=current} 'or' right=__2)*
+;
+__2 returns __Exp:
+	__3 ({__2.left=current} 'and' right=__3)*
+;
+__3 returns __Exp:
+	__4 ({__3.left=current} ('!=' | '==' | '<=' | '>=' | '<' | '>') right=__4)*
+;
+__4 returns __Exp:
+	__5 ({__4.left=current} '|' right=__5)*
+;
+__5 returns __Exp:
+	__6 ({__5.left=current} '^' right=__6)*
+;
+__6 returns __Exp:
+	__7 ({__6.left=current} '&' right=__7)*
+;
+__7 returns __Exp:
+	__8 ({__7.left=current} ('>>' | '<<') right=__8)*
+;
+__8 returns __Exp:
+	__9 ({__8.left=current} ('+' | '-') right=__9)*
+;
+__9 returns __Exp:
+	__10 ({__9.left=current} ('*' | '/' | '%') right=__10)* 
+;
+__10 returns __Exp:
+	('not' | '-' | '+' | '~' | '*' | '&&' | '&' | '$$' | '$' )* __11
+;
+__11 returns __Exp:
+	'a'
+;
