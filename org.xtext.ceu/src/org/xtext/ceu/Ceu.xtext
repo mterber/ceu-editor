@@ -43,10 +43,67 @@ __9 returns __Exp:
 	__10 ({__9.left=current} ('*' | '/' | '%') right=__10)*;
 
 __10 returns __Exp:
-	('not' | '-' | '+' | '~' | '*' | VEC)* __11;
+	('not' | '-' | '+' | '~' | '*' | AMPERSAND | DOLLAR | ('(' cast+=__Cast ')'))* exp=__11;
 
 __11 returns __Exp:
 	'a';
 
-terminal VEC:
-	'&&' !'&' | '&' !'&' | '$$' !'$' | '$' !'$';
+terminal AMPERSAND:
+	'&&' !'&' | '&' !'&';
+
+terminal DOLLAR:
+	'$$' !'$' | '$' !'$';
+
+__Cast:
+	Type | ('@nohold' | '@plain' | '@pure');
+
+	/*
+ * Identifiers
+ * --------------------------------------------------------
+ */
+terminal TYPES:
+	'bool' | 'byte' | 'char' | 'f32' | 'f64' | 'float' | 'int' | 's16' | 's32' | 's64' | 's8' | 'u16' | 'u32' | 'u64' |
+	'u8' | 'uint' | 'void' | 'word';
+
+terminal fragment ALPHA: // Alpha
+	'a'..'z' | '_' | 'A'..'Z';
+
+terminal fragment ALPHANUM: // Alphanum
+	ALPHA | '0'..'9';
+
+terminal fragment ALPHANUM_L: // ALPHANUM
+	'A'..'Z' | '_' | '0'..'9';
+
+terminal fragment ALPHANUM_S: // alphanum
+	'a'..'z' | '_' | '0'..'9';
+
+Ext:
+	__ID_EXT_TAG;
+
+Var:
+	__ID_VAR;
+
+Nat:
+	__ID_NAT;
+
+terminal __ID_VAR:
+	'a'..'z' ALPHANUM*;
+
+terminal __ID_EXT_TAG:
+	'A'..'Z' ALPHANUM_L*;
+
+terminal __ID_CLS_ADT:
+	'A'..'Z' ALPHANUM*;
+
+terminal __ID_NAT:
+	'_' ALPHANUM+;
+
+terminal __ID_FIELD:
+	ALPHA ALPHANUM*;
+
+__ID_Type:
+	TYPES | __ID_NAT | __ID_CLS_ADT;
+
+Type:
+	__ID_Type (AMPERSAND | '?' | ('[' (exp+=__Exp)? ']'))*;
+
