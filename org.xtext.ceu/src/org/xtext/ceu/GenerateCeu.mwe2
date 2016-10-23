@@ -7,12 +7,18 @@ var rootPath = ".."
 
 Workflow {
 	
-	component = XtextGenerator {
+		component = XtextGenerator {
 		configuration = {
 			project = StandardProjectConfig {
 				baseName = "org.xtext.ceu"
 				rootPath = rootPath
+				runtimeTest = {
+					enabled = true
+				}
 				eclipsePlugin = {
+					enabled = true
+				}
+				eclipsePluginTest = {
 					enabled = true
 				}
 				createEclipseMetaData = true

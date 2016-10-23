@@ -11,6 +11,7 @@ import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.xtext.ceu.ceu.Root
+import org.eclipse.xtext.util.EmfFormatter
 
 @RunWith(XtextRunner)
 @InjectWith(CeuInjectorProvider)
@@ -22,8 +23,9 @@ class CeuParsingTest{
 	@Test 
 	def void loadModel() {
 		val result = parseHelper.parse('''
-			Hello Xtext!
+			1 + 4
 		''')
+		println(EmfFormatter.objToStr(result));
 		Assert.assertNotNull(result)
 	}
 
