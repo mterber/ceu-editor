@@ -23,7 +23,7 @@ class CeuParsingTest{
 	@Test 
 	def void loadModel() {
 		val result = parseHelper.parse('''
-			1 + 4
+			1 and 7 or 95 | 4
 		''')
 		println(EmfFormatter.objToStr(result));
 		Assert.assertNotNull(result)

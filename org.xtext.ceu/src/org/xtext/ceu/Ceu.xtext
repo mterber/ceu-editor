@@ -5,10 +5,6 @@ generate ceu "http://www.xtext.org/ceu/Ceu"
 Root:
 	__Exp;
 
-	/*
- * Expressions
- * --------------------------------------------------------
- */
 __Exp:
 	__0;
 
@@ -16,37 +12,57 @@ __0 returns __Exp:
 	__1 '..'?;
 
 __1 returns __Exp:
-	__2 ({__1.left=current} 'or' right=__2)*;
+	__2 ({OperatorBinary.left=current} op='or' right=__2)*;
 
 __2 returns __Exp:
-	__3 ({__2.left=current} 'and' right=__3)*;
+	__3 ({OperatorBinary.left=current} op='and' right=__3)*;
 
 __3 returns __Exp:
-	__4 ({__3.left=current} ('!=' | '==' | '<=' | '>=' | '<' | '>') right=__4)*;
+	__4 ({OperatorBinary.left=current} op=('!=' | '==' | '<=' | '>=' | '<' | '>') right=__4)*;
 
 __4 returns __Exp:
-	__5 ({__4.left=current} '|' right=__5)*;
+	__5 ({OperatorBinary.left=current} op='|' right=__5)*;
 
 __5 returns __Exp:
-	__6 ({__5.left=current} '^' right=__6)*;
+	__6 ({OperatorBinary.left=current} op='^' right=__6)*;
 
 __6 returns __Exp:
-	__7 ({__6.left=current} '&' right=__7)*;
+	__7 ({OperatorBinary.left=current} op='&' right=__7)*;
 
 __7 returns __Exp:
-	__8 ({__7.left=current} ('>>' | '<<') right=__8)*;
+	__8 ({OperatorBinary.left=current} op=('>>' | '<<') right=__8)*;
 
 __8 returns __Exp:
-	__9 ({__8.left=current} ('+' | '-') right=__9)*;
+	__9 ({OperatorBinary.left=current} op=('+' | '-') right=__9)*;
 
 __9 returns __Exp:
-	__10 ({__9.left=current} ('*' | '/' | '%') right=__10)*;
-
+	__10 ({OperatorBinary.left=current} op=('*' | '/' | '%') right=__10)*;
 __10 returns __Exp:
-	('not' | '-' | '+' | '~' | '*' | AMPERSAND | DOLLAR | ('(' cast+=__Cast ')'))* exp=__11;
+	val=INT
+	;
+/*
+__10 returns __Exp:
+	('not' | '-' | '+' | '~' | '*' | AMPERSAND | DOLLAR | ('(' cast+=__Cast ')'))* __11;
 
-__11 returns __Exp:
-	'a';
+__11:
+	__12
+	( 
+		( '(' expList+=ExpList ')' ('finalize' 'with' finally+=Finally 'end')? ) |
+		( '[' exps+=__Exp ']' ) |
+		( (':' | '.') __ID_FIELD ) |
+		'?' | '!'
+	)*
+;
+__12:
+	__Prim
+;
+__Prim:
+	( '(' __Exp ')' )  |
+	SIZEOF | Var |	Nat | NULL | NUMBER | STRING | Global |
+	This | Outer | RawExp | Vector_constr |
+	('call' __Exp) |
+	('call/rec' __Exp)
+;
 
 terminal AMPERSAND:
 	'&&' !'&' | '&' !'&';
@@ -57,10 +73,6 @@ terminal DOLLAR:
 __Cast:
 	Type | ('@nohold' | '@plain' | '@pure');
 
-	/*
- * Identifiers
- * --------------------------------------------------------
- */
 terminal TYPES:
 	'bool' | 'byte' | 'char' | 'f32' | 'f64' | 'float' | 'int' | 's16' | 's32' | 's64' | 's8' | 'u16' | 'u32' | 'u64' |
 	'u8' | 'uint' | 'void' | 'word';
@@ -105,5 +117,4 @@ __ID_Type:
 	TYPES | __ID_NAT | __ID_CLS_ADT;
 
 Type:
-	__ID_Type (AMPERSAND | '?' | ('[' (exp+=__Exp)? ']'))*;
-
+	__ID_Type (AMPERSAND | '?' | ('[' (exp+=__Exp)? ']'))*; */
