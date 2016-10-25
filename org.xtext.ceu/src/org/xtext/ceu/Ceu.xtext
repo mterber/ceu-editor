@@ -39,7 +39,7 @@ __9 returns __Exp:
 	__10 ({OperationBinary.operandLeft=current} operator=('*' | '/' | '%') operandRight=__10)*;
 
 __10 returns __Exp:
-	( {OperationUnary} (operators+=('not' | '-' | '+' | '~' | '*'/* | AMPERSAND | DOLLAR | ('(' cast+=__Cast ')') */) )+ operand=__11 ) |
+	( {OperationUnary} (operators+=('not' | '-' | '+' | '~' | '*' | '&&' | '&' | '$$' | '$' /*| ('(' cast+=__Cast ')') */) )+ operand=__11 ) |
 	__11;
 
 __11 returns __Exp:
@@ -65,12 +65,6 @@ __Prim:
 	('call' __Exp) |
 	('call/rec' __Exp)
 ;
-
-terminal AMPERSAND:
-	'&&' !'&' | '&' !'&';
-
-terminal DOLLAR:
-	'$$' !'$' | '$' !'$';
 
 __Cast:
 	Type | ('@nohold' | '@plain' | '@pure');
