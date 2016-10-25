@@ -12,38 +12,40 @@ __0 returns __Exp:
 	__1 '..'?;
 
 __1 returns __Exp:
-	__2 ({OperatorBinary.left=current} op='or' right=__2)*;
+	__2 ({BinaryOperation.operandLeft=current} operator='or' operandRight=__2)*;
 
 __2 returns __Exp:
-	__3 ({OperatorBinary.left=current} op='and' right=__3)*;
+	__3 ({OperationBinary.operandLeft=current} operator='and' operandRight=__3)*;
 
 __3 returns __Exp:
-	__4 ({OperatorBinary.left=current} op=('!=' | '==' | '<=' | '>=' | '<' | '>') right=__4)*;
+	__4 ({OperationBinary.operandLeft=current} operator=('!=' | '==' | '<=' | '>=' | '<' | '>') operandRight=__4)*;
 
 __4 returns __Exp:
-	__5 ({OperatorBinary.left=current} op='|' right=__5)*;
+	__5 ({OperationBinary.operandLeft=current} operator='|' operandRight=__5)*;
 
 __5 returns __Exp:
-	__6 ({OperatorBinary.left=current} op='^' right=__6)*;
+	__6 ({OperationBinary.operandLeft=current} operator='^' operandRight=__6)*;
 
 __6 returns __Exp:
-	__7 ({OperatorBinary.left=current} op='&' right=__7)*;
+	__7 ({OperationBinary.operandLeft=current} operator='&' operandRight=__7)*;
 
 __7 returns __Exp:
-	__8 ({OperatorBinary.left=current} op=('>>' | '<<') right=__8)*;
+	__8 ({OperationBinary.operandLeft=current} operator=('>>' | '<<') operandRight=__8)*;
 
 __8 returns __Exp:
-	__9 ({OperatorBinary.left=current} op=('+' | '-') right=__9)*;
+	__9 ({OperationBinary.operandLeft=current} operator=('+' | '-') operandRight=__9)*;
 
 __9 returns __Exp:
-	__10 ({OperatorBinary.left=current} op=('*' | '/' | '%') right=__10)*;
-__10 returns __Exp:
-	val=INT
-	;
-/*
-__10 returns __Exp:
-	('not' | '-' | '+' | '~' | '*' | AMPERSAND | DOLLAR | ('(' cast+=__Cast ')'))* __11;
+	__10 ({OperationBinary.operandLeft=current} operator=('*' | '/' | '%') operandRight=__10)*;
 
+__10 returns __Exp:
+	( {OperationUnary} (operators+=('not' | '-' | '+' | '~' | '*'/* | AMPERSAND | DOLLAR | ('(' cast+=__Cast ')') */) )+ operand=__11 ) |
+	__11;
+
+__11 returns __Exp:
+	val=INT
+;
+/*
 __11:
 	__12
 	( 
