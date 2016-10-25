@@ -39,12 +39,52 @@ __9 returns __Exp:
 	__10 ({OperationBinary.operandLeft=current} operator=('*' | '/' | '%') operandRight=__10)*;
 
 __10 returns __Exp:
-	( {OperationUnary} (operators+=('not' | '-' | '+' | '~' | '*' | '&&' | '&' | '$$' | '$' /*| ('(' cast+=__Cast ')') */) )+ operand=__11 ) |
+	( {OperationUnary} ( operators+=('not' | '-' | '+' | '~' | '*' | '&&' | '&' | '$$' | '$') | ('(' cast+=__Cast ')') )+ operand=__11 ) |
 	__11;
 
 __11 returns __Exp:
 	val=INT
 ;
+
+__Cast returns __Exp:
+	Type | {Annotation} name=('@nohold' | '@plain' | '@pure');
+
+Type:
+	__ID_Type ('&&' | '&' | '?' | ('[' (exp+=__Exp)? ']'))*;
+
+__ID_Type returns Type:
+	name=(TYPES | __ID_NAT | __ID_CLS_ADT);
+	
+terminal TYPES:
+	'bool' | 'byte' | 'char' | 'f32' | 'f64' | 'float' | 'int' | 's16' | 's32' | 's64' | 's8' | 'u16' | 'u32' | 'u64' |
+	'u8' | 'uint' | 'void' | 'word';
+	
+terminal __ID_VAR:
+	'a'..'z' ALPHANUM*;
+
+terminal __ID_EXT_TAG:
+	'A'..'Z' ALPHANUM_L*;
+
+terminal __ID_CLS_ADT:
+	'A'..'Z' ALPHANUM*;
+
+terminal __ID_NAT:
+	'_' ALPHANUM+;
+
+terminal __ID_FIELD:
+	ALPHA ALPHANUM*;
+
+terminal fragment ALPHA: // Alpha
+	'a'..'z' | '_' | 'A'..'Z';
+
+terminal fragment ALPHANUM: // Alphanum
+	ALPHA | '0'..'9';
+
+terminal fragment ALPHANUM_L: // ALPHANUM
+	'A'..'Z' | '_' | '0'..'9';
+
+terminal fragment ALPHANUM_S: // alphanum
+	'a'..'z' | '_' | '0'..'9';
 /*
 __11:
 	__12
@@ -66,24 +106,9 @@ __Prim:
 	('call/rec' __Exp)
 ;
 
-__Cast:
-	Type | ('@nohold' | '@plain' | '@pure');
 
-terminal TYPES:
-	'bool' | 'byte' | 'char' | 'f32' | 'f64' | 'float' | 'int' | 's16' | 's32' | 's64' | 's8' | 'u16' | 'u32' | 'u64' |
-	'u8' | 'uint' | 'void' | 'word';
 
-terminal fragment ALPHA: // Alpha
-	'a'..'z' | '_' | 'A'..'Z';
 
-terminal fragment ALPHANUM: // Alphanum
-	ALPHA | '0'..'9';
-
-terminal fragment ALPHANUM_L: // ALPHANUM
-	'A'..'Z' | '_' | '0'..'9';
-
-terminal fragment ALPHANUM_S: // alphanum
-	'a'..'z' | '_' | '0'..'9';
 
 Ext:
 	__ID_EXT_TAG;
@@ -94,23 +119,7 @@ Var:
 Nat:
 	__ID_NAT;
 
-terminal __ID_VAR:
-	'a'..'z' ALPHANUM*;
 
-terminal __ID_EXT_TAG:
-	'A'..'Z' ALPHANUM_L*;
 
-terminal __ID_CLS_ADT:
-	'A'..'Z' ALPHANUM*;
 
-terminal __ID_NAT:
-	'_' ALPHANUM+;
-
-terminal __ID_FIELD:
-	ALPHA ALPHANUM*;
-
-__ID_Type:
-	TYPES | __ID_NAT | __ID_CLS_ADT;
-
-Type:
-	__ID_Type (AMPERSAND | '?' | ('[' (exp+=__Exp)? ']'))*; */
+*/
