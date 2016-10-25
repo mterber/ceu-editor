@@ -51,14 +51,36 @@ __11 returns __Exp:
 		'?' | '!'
 	)*
 ;
-__12:
-	val=INT//__Prim
+__12 returns __Exp:
+	__Prim
 ;
-
+__Prim returns __Exp:
+	val=NUMBER
+	/*( '(' __Exp ')' )  |
+	SIZEOF | 
+	Var |	Nat | NULL |*/
+	/*NUMBER*/
+	/*| STRING | Global |
+	This | Outer | RawExp | Vector_constr |
+	('call' __Exp) |
+	('call/rec' __Exp)*/
+;
 
 __Cast returns __Exp:
 	Type | {Annotation} name=('@nohold' | '@plain' | '@pure');
+	
+SIZEOF returns __Exp:
+	'sizeof' '(' (Type | __Exp) ')'
+;
 
+terminal NUMBER: //TODO
+	(INT ('.' INT)?) | HEX
+	'false' |
+	'true'
+;
+terminal fragment HEX:		//Used in Rule: Number
+	('0' ('x'|'X') ('0'..'9'|'A'..'F'|'a'..'f')*)
+;
 Type:
 	__ID_Type ('&&' | '&' | '?' | ('[' (exp+=__Exp)? ']'))*;
 
@@ -105,13 +127,7 @@ terminal fragment ALPHANUM_S: // alphanum
 	'a'..'z' | '_' | '0'..'9';
 /*
 
-__Prim:
-	( '(' __Exp ')' )  |
-	SIZEOF | Var |	Nat | NULL | NUMBER | STRING | Global |
-	This | Outer | RawExp | Vector_constr |
-	('call' __Exp) |
-	('call/rec' __Exp)
-;
+
 
 
 
