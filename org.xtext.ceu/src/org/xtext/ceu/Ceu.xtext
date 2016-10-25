@@ -43,8 +43,18 @@ __10 returns __Exp:
 	__11;
 
 __11 returns __Exp:
-	val=INT
+	__12
+	( 
+		( '(' (expList+=ExpList)? ')' ('finalize' 'with' finally+=Finally 'end')? ) |
+		( '[' exps+=__Exp ']' ) |
+		( (':' | '.') __ID_FIELD ) |
+		'?' | '!'
+	)*
 ;
+__12:
+	val=INT//__Prim
+;
+
 
 __Cast returns __Exp:
 	Type | {Annotation} name=('@nohold' | '@plain' | '@pure');
@@ -54,7 +64,15 @@ Type:
 
 __ID_Type returns Type:
 	name=(TYPES | __ID_NAT | __ID_CLS_ADT);
-	
+
+ExpList returns __Exp:
+	__Exp ({ExpList.first=current}',' next=__Exp)*
+;
+
+Finally:
+	val=INT//Block
+;
+
 terminal TYPES:
 	'bool' | 'byte' | 'char' | 'f32' | 'f64' | 'float' | 'int' | 's16' | 's32' | 's64' | 's8' | 'u16' | 'u32' | 'u64' |
 	'u8' | 'uint' | 'void' | 'word';
@@ -86,18 +104,7 @@ terminal fragment ALPHANUM_L: // ALPHANUM
 terminal fragment ALPHANUM_S: // alphanum
 	'a'..'z' | '_' | '0'..'9';
 /*
-__11:
-	__12
-	( 
-		( '(' expList+=ExpList ')' ('finalize' 'with' finally+=Finally 'end')? ) |
-		( '[' exps+=__Exp ']' ) |
-		( (':' | '.') __ID_FIELD ) |
-		'?' | '!'
-	)*
-;
-__12:
-	__Prim
-;
+
 __Prim:
 	( '(' __Exp ')' )  |
 	SIZEOF | Var |	Nat | NULL | NUMBER | STRING | Global |
