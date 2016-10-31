@@ -39,8 +39,9 @@ __9 returns __Exp:
 	__10 ({OperationBinary.operandLeft=current} operator=('*' | '/' | '%') operandRight=__10)*;
 
 __10 returns __Exp:
-	( {OperationUnary} ( operators+=('not' | '-' | '+' | '~' | '*' | '&&' | '&' | '$$' | '$') | ('(' cast+=__Cast ')') )+ operand=__11 ) |
-	__11;
+//	( {OperationUnary} ( operators+=('not' | '-' | '+' | '~' | '*' | '&&' | '&' | '$$' | '$') | ('(' cast+=__Cast ')') )+ operand=__11 )
+//	| __11;
+	( operators+=('not' | '-' | '+' | '~' | '*' | '&&' | '&' | '$$' | '$') | ('(' cast+=__Cast ')') )* operand=__11;
 
 __11 returns __Exp:
 	__12
@@ -55,34 +56,66 @@ __12 returns __Exp:
 	__Prim
 ;
 __Prim returns __Exp:
-	val=NUMBER
-	/*( '(' __Exp ')' )  |
-	SIZEOF | 
-	Var |	Nat | NULL |*/
-	/*NUMBER*/
-	/*| STRING | Global |
-	This | Outer | RawExp | Vector_constr |
-	('call' __Exp) |
-	('call/rec' __Exp)*/
+	( '(' __Exp ')' )
+	//| a=Sizeof
+	//| Var
+	| Nat
+	//| NULL
+	//| Number
+	//| STRING
+	//| Global
+	//| This
+	//| Outer
+	//| RawExp
+	//| Vector_constr
+	//| ('call' __Exp)
+	//| ('call/rec' __Exp)
 ;
 
 __Cast returns __Exp:
 	Type | {Annotation} name=('@nohold' | '@plain' | '@pure');
 	
-SIZEOF returns __Exp:
-	'sizeof' '(' (Type | __Exp) ')'
+Sizeof returns __Exp:
+	'sizeof' '(' (=>Type | __Exp) ')'
+;
+Number:
+	INT | FLOAT | HEX | 'true' | 'false';
+
+Var:
+	__ID_VAR
+;
+Nat:
+	__ID_NAT
+;
+NULL:
+	'null'
+;
+Global:
+	'global'
+;
+This:
+	'this'
+;
+Outer:
+	'outer'
+;
+RawExp:
+	'{' __raw '}'
 ;
 
-terminal NUMBER: //TODO
-	(INT ('.' INT)?) | HEX
-	'false' |
-	'true'
+__raw: // TODO
+	'c-code'
 ;
-terminal fragment HEX:		//Used in Rule: Number
-	('0' ('x'|'X') ('0'..'9'|'A'..'F'|'a'..'f')*)
+Vector_constr:
+	tups+=Vector_tup ( '..' (tups+=Vector_tup | exps+=__Exp) )*
 ;
+
+Vector_tup:
+	'[' ExpList ']'
+;
+
 Type:
-	__ID_Type ('&&' | '&' | '?' | ('[' (exp+=__Exp)? ']'))*;
+	__ID_Type ( '&&' | '&' | '?' | ('[' (exp+=__Exp)? ']') )*;
 
 __ID_Type returns Type:
 	name=(TYPES | __ID_NAT | __ID_CLS_ADT);
@@ -94,6 +127,7 @@ ExpList returns __Exp:
 Finally:
 	val=INT//Block
 ;
+
 
 terminal TYPES:
 	'bool' | 'byte' | 'char' | 'f32' | 'f64' | 'float' | 'int' | 's16' | 's32' | 's64' | 's8' | 'u16' | 'u32' | 'u64' |
@@ -113,6 +147,12 @@ terminal __ID_NAT:
 
 terminal __ID_FIELD:
 	ALPHA ALPHANUM*;
+	
+terminal HEX:
+	'0' ('x' | 'X') ('0'..'9' | 'a'..'f' | 'A'..'F')+;
+
+terminal FLOAT:
+	INT '.' INT (('e' | 'E') '-'? INT)?;
 
 terminal fragment ALPHA: // Alpha
 	'a'..'z' | '_' | 'A'..'Z';
@@ -125,24 +165,3 @@ terminal fragment ALPHANUM_L: // ALPHANUM
 
 terminal fragment ALPHANUM_S: // alphanum
 	'a'..'z' | '_' | '0'..'9';
-/*
-
-
-
-
-
-
-
-Ext:
-	__ID_EXT_TAG;
-
-Var:
-	__ID_VAR;
-
-Nat:
-	__ID_NAT;
-
-
-
-
-*/
