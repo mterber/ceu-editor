@@ -3,35 +3,171 @@ grammar org.xtext.ceu.Ceu with org.eclipse.xtext.common.Terminals
 generate ceu "http://www.xtext.org/ceu/Ceu"
 
 Root:
-	__Exp;
+	Expression;
+	
+Expression:
+	LogicOr
+;
 
-__Exp:
-	__0;
+LogicOr returns Expression:
+	LogicAnd ({LogicOr.left=current} op='or' right=LogicAnd)*
+;
 
-__0 returns __Exp:
-	__1 '..'?;
+LogicAnd returns Expression:
+	Compare ({LogicAnd.left=current} op='and' right=Compare)*;
+	
+Compare returns Expression:
+	BinaryOr ({Compare.left=current} op=('!=' | '==' | '<=' | '>=' | '<' | '>') right=BinaryOr)*
+;
 
-__1 returns __Exp:
-	__2 ({BinaryOperation.operandLeft=current} operator='or' operandRight=__2)*;
+BinaryOr returns Expression:
+	BinaryXor ({BinaryOr.left=current} op='|' right=BinaryXor)*
+;
 
-__2 returns __Exp:
-	__3 ({OperationBinary.operandLeft=current} operator='and' operandRight=__3)*;
+BinaryXor returns Expression:
+	BinaryAnd ({BinaryXor.left=current} op='^' right=BinaryAnd)*
+;
 
-__3 returns __Exp:
-	__4 ({OperationBinary.operandLeft=current} operator=('!=' | '==' | '<=' | '>=' | '<' | '>') operandRight=__4)*;
+BinaryAnd returns Expression:
+	Shift ({BinaryAnd.left=current} op='&' right=Shift)*
+;
 
-__4 returns __Exp:
-	__5 ({OperationBinary.operandLeft=current} operator='|' operandRight=__5)*;
+Shift returns Expression:
+	Addition ({Shift.left=current} op=('>>' | '<<') right=Addition)*
+;
 
-__5 returns __Exp:
-	__6 ({OperationBinary.operandLeft=current} operator='^' operandRight=__6)*;
+Addition returns Expression:
+	Multiplication ({Addition.left=current} op=('+' | '-') right=Multiplication)*
+;
 
-__6 returns __Exp:
-	__7 ({OperationBinary.operandLeft=current} operator='&' operandRight=__7)*;
+Multiplication returns Expression:
+	Unary ({Multiplication.left=current} op=('*' | '/' | '%') right=Unary)*
+;
 
-__7 returns __Exp:
-	__8 ({OperationBinary.operandLeft=current} operator=('>>' | '<<') operandRight=__8)*;
+Unary returns Expression:
+	( op+=('not' | '-' | '+' | '~' | '*' | '&&' | '&' | '$$' | '$') | (=>'(' cast+=Cast ')') )* right=Misc
+;
 
+Misc returns Expression:
+	Primary
+	( 
+		( '(' (expList+=ExpList)? ')' ('finalize' 'with' finally+=Finally 'end')? ) |
+		( '[' exps+=Expression ']' ) |
+		( (':' | '.') __ID_FIELD ) |
+		'?' | '!'
+	)*
+;
+
+Primary returns Expression:
+	'(' Expression ')' |
+	//| a=Sizeof
+	name=Var |
+	name=Nat |
+	key=Null |
+	num=Number |
+	str=STRING |
+	key=Global |
+	key=This |
+	key=Outer |
+	RawExp |
+	//Vector_constr
+	('call' Expression)
+	//| ('call/rec' __Exp)
+;
+
+Cast returns Expression:
+	Type | {Annotation} name=('@nohold' | '@plain' | '@pure');
+
+Sizeof returns Expression:
+	'sizeof' '(' (=>Type | Expression) ')'
+;
+Number:
+	INT | FLOAT | HEX | 'true' | 'false';
+
+Var:
+	__ID_VAR
+;
+Nat:
+	__ID_NAT
+;
+Null:
+	'null'
+;
+Global:
+	'global'
+;
+This:
+	'this'
+;
+Outer:
+	'outer'
+;
+RawExp:
+	'{' __raw '}'
+;
+
+__raw: // TODO
+	'c-code'
+;
+Vector_constr:
+	tups+=Vector_tup ( '..' (tups+=Vector_tup /*| exps+=Expression*/) )*
+;
+
+Vector_tup:
+	'[' ExpList ']'
+;
+
+Type:
+	__ID_Type ( '&&' | '&' | '?' | ('[' (exp+=Expression)? ']') )*;
+
+__ID_Type returns Type:
+	name=(TYPES | __ID_NAT | __ID_CLS_ADT);
+
+ExpList returns __Exp:
+	Expression ({ExpList.first=current}',' next=Expression)*
+;
+
+Finally:
+	val=INT//Block
+;
+
+terminal TYPES:
+	'bool' | 'byte' | 'char' | 'f32' | 'f64' | 'float' | 'int' | 's16' | 's32' | 's64' | 's8' | 'u16' | 'u32' | 'u64' |
+	'u8' | 'uint' | 'void' | 'word';
+	
+terminal __ID_VAR:
+	'a'..'z' ALPHANUM*;
+
+terminal __ID_EXT_TAG:
+	'A'..'Z' ALPHANUM_L*;
+
+terminal __ID_CLS_ADT:
+	'A'..'Z' ALPHANUM*;
+
+terminal __ID_NAT:
+	'_' ALPHANUM+;
+
+terminal __ID_FIELD:
+	ALPHA ALPHANUM*;
+	
+terminal HEX:
+	'0' ('x' | 'X') ('0'..'9' | 'a'..'f' | 'A'..'F')+;
+
+terminal FLOAT:
+	INT '.' INT (('e' | 'E') '-'? INT)?;
+
+terminal fragment ALPHA: // Alpha
+	'a'..'z' | '_' | 'A'..'Z';
+
+terminal fragment ALPHANUM: // Alphanum
+	ALPHA | '0'..'9';
+
+terminal fragment ALPHANUM_L: // ALPHANUM
+	'A'..'Z' | '_' | '0'..'9';
+
+terminal fragment ALPHANUM_S: // alphanum
+	'a'..'z' | '_' | '0'..'9';
+/*
 __8 returns __Exp:
 	__9 ({OperationBinary.operandLeft=current} operator=('+' | '-') operandRight=__9)*;
 
@@ -129,39 +265,5 @@ Finally:
 ;
 
 
-terminal TYPES:
-	'bool' | 'byte' | 'char' | 'f32' | 'f64' | 'float' | 'int' | 's16' | 's32' | 's64' | 's8' | 'u16' | 'u32' | 'u64' |
-	'u8' | 'uint' | 'void' | 'word';
-	
-terminal __ID_VAR:
-	'a'..'z' ALPHANUM*;
 
-terminal __ID_EXT_TAG:
-	'A'..'Z' ALPHANUM_L*;
-
-terminal __ID_CLS_ADT:
-	'A'..'Z' ALPHANUM*;
-
-terminal __ID_NAT:
-	'_' ALPHANUM+;
-
-terminal __ID_FIELD:
-	ALPHA ALPHANUM*;
-	
-terminal HEX:
-	'0' ('x' | 'X') ('0'..'9' | 'a'..'f' | 'A'..'F')+;
-
-terminal FLOAT:
-	INT '.' INT (('e' | 'E') '-'? INT)?;
-
-terminal fragment ALPHA: // Alpha
-	'a'..'z' | '_' | 'A'..'Z';
-
-terminal fragment ALPHANUM: // Alphanum
-	ALPHA | '0'..'9';
-
-terminal fragment ALPHANUM_L: // ALPHANUM
-	'A'..'Z' | '_' | '0'..'9';
-
-terminal fragment ALPHANUM_S: // alphanum
-	'a'..'z' | '_' | '0'..'9';
+	*/
