@@ -3,133 +3,159 @@ grammar org.xtext.ceu.Ceu with org.eclipse.xtext.common.Terminals
 generate ceu "http://www.xtext.org/ceu/Ceu"
 
 Root:
-	Expression;
+	Expression
+;
 	
+	/*
+Type:
+	__ID_Type //( '&&' | '&' | '?' | ('[' (exp5+=Expression)? ']') )*;
+	;
+	* 
+	*/
+	
+Type:
+	SpecifierQualifierList AbstractDeclarator?
+;
+
+AbstractDeclarator:
+	Pointer DirectAbstractDeclarator?
+	| DirectAbstractDeclarator
+;
+
+DirectAbstractDeclarator:
+	( '(' AbstractDeclarator ')' | AbstractDeclaratorSuffix) AbstractDeclaratorSuffix*
+;
+
+AbstractDeclaratorSuffix:
+	'[' ']'
+	| '[' LogicalOrExpression ']'
+	| '(' ')'
+;
+
+Pointer:
+	'*' TypeQualifier+ Pointer?
+	| '*' Pointer
+	| '*'
+;
+
+SpecifierQualifierList:
+	(TypeQualifier | TypeSpecifier)+
+;
+
+TypeSpecifier:
+	TYPES
+;
+
+TypeQualifier:
+	'@nohold' | '@plain' | '@pure'
+;
+
+// -----------
+// Expressions
+// -----------
+ArgumentExpressionList:
+	first=AssignmentExpression (',' next+=AssignmentExpression)*
+;
+
 Expression:
-	LogicOr
+	first=AssignmentExpression (',' next+=AssignmentExpression)*
 ;
 
-LogicOr returns Expression:
-	LogicAnd ({LogicOr.left=current} op='or' right=LogicAnd)*
+AssignmentExpression returns Expression:
+	Lvalue AssignmentOperator exp=AssignmentExpression
+	| LogicalOrExpression
 ;
 
-LogicAnd returns Expression:
-	Compare ({LogicAnd.left=current} op='and' right=Compare)*;
-	
-Compare returns Expression:
-	BinaryOr ({Compare.left=current} op=('!=' | '==' | '<=' | '>=' | '<' | '>') right=BinaryOr)*
+Lvalue returns Expression:
+	UnaryExpression
 ;
 
-BinaryOr returns Expression:
-	BinaryXor ({BinaryOr.left=current} op='|' right=BinaryXor)*
+AssignmentOperator:
+	'='
 ;
 
-BinaryXor returns Expression:
-	BinaryAnd ({BinaryXor.left=current} op='^' right=BinaryAnd)*
+LogicalOrExpression returns Expression:
+	LogicalAndExpression ({LogicalOrExpression.left=current} 'or' right=LogicalAndExpression)*
 ;
 
-BinaryAnd returns Expression:
-	Shift ({BinaryAnd.left=current} op='&' right=Shift)*
+LogicalAndExpression returns Expression:
+	InclusiveOrExpression ({LogicalAndExpression.left=current} 'and' right=InclusiveOrExpression)*
 ;
 
-Shift returns Expression:
-	Addition ({Shift.left=current} op=('>>' | '<<') right=Addition)*
+InclusiveOrExpression returns Expression:
+	ExclusiveOrExpression ({InclusiveOrExpression.left=current} '|' right=ExclusiveOrExpression)*
 ;
 
-Addition returns Expression:
-	Multiplication ({Addition.left=current} op=('+' | '-') right=Multiplication)*
+ExclusiveOrExpression returns Expression:
+	AndExpression ({ExclusiveOrExpression.left=current} '^' right=AndExpression)*
 ;
 
-Multiplication returns Expression:
-	Unary ({Multiplication.left=current} op=('*' | '/' | '%') right=Unary)*
+AndExpression returns Expression:
+	EqualityExpression ({AndExpression.left=current} '&' right=EqualityExpression)*
 ;
 
-Unary returns Expression:
-	( op+=('not' | '-' | '+' | '~' | '*' | '&&' | '&' | '$$' | '$') | (=>'(' cast+=Cast ')') )* right=Misc
+EqualityExpression returns Expression:
+	RelationalExpression ({EqualityExpression.left=current} ('==' | '!=') right=RelationalExpression)*
 ;
 
-Misc returns Expression:
-	Primary
-	( 
-		( '(' (expList+=ExpList)? ')' ('finalize' 'with' finally+=Finally 'end')? ) |
-		( '[' exps+=Expression ']' ) |
-		( (':' | '.') __ID_FIELD ) |
-		'?' | '!'
+RelationalExpression returns Expression:
+	ShiftExpression ({RelationalExpression.left=current} ('<' | '>' | '<=' | '>=') right=ShiftExpression)*
+;
+
+ShiftExpression returns Expression:
+	AdditiveExpression ({ShiftExpression.left=current} ('<<' | '>>') right=AdditiveExpression)*
+;
+
+AdditiveExpression returns Expression:
+	MultiplicativeExpression ({AdditiveExpression.left=current} ('+' | '-') right=MultiplicativeExpression)*
+;
+
+MultiplicativeExpression returns Expression:
+	CastExpression ({MultiplicativeExpression.left=current} ('*' | '/' | '%') right=CastExpression)*
+;
+
+CastExpression returns Expression:
+	'(' Type ')' right=CastExpression
+	| UnaryExpression
+;
+
+UnaryExpression returns Expression:
+	PostfixExpression
+	| UnaryOperator CastExpression
+	| 'sizeof' ('(' Type ')' | UnaryExpression) 
+;
+
+PostfixExpression returns Expression:
+	PrimaryExpression
+	(
+		'[' exp3+=Expression ']'
+		| ('(' ')' | '(' exp2+=ArgumentExpressionList ')') ('finalize' 'with' finally+=Finally 'end')?
+		| (':' | '.') __ID_FIELD
+		| '?'
+		| '!'
 	)*
 ;
 
-Primary returns Expression:
-	'(' Expression ')' |
-	//| a=Sizeof
-	name=Var |
-	name=Nat |
-	key=Null |
-	num=Number |
-	str=STRING |
-	key=Global |
-	key=This |
-	key=Outer |
-	RawExp |
-	//Vector_constr
-	('call' Expression)
-	//| ('call/rec' __Exp)
+UnaryOperator:
+	'not' | '-' | '+' | '~' | '*' | '&&' | '&' | '$$' | '$'
 ;
 
-Cast returns Expression:
-	Type | {Annotation} name=('@nohold' | '@plain' | '@pure');
-
-Sizeof returns Expression:
-	'sizeof' '(' (=>Type | Expression) ')'
-;
-Number:
-	INT | FLOAT | HEX | 'true' | 'false';
-
-Var:
-	__ID_VAR
-;
-Nat:
-	__ID_NAT
-;
-Null:
-	'null'
-;
-Global:
-	'global'
-;
-This:
-	'this'
-;
-Outer:
-	'outer'
-;
-RawExp:
-	'{' __raw '}'
-;
-
-__raw: // TODO
-	'c-code'
-;
-Vector_constr:
-	tups+=Vector_tup ( '..' (tups+=Vector_tup /*| exps+=Expression*/) )*
-;
-
-Vector_tup:
-	'[' ExpList ']'
-;
-
-Type:
-	__ID_Type ( '&&' | '&' | '?' | ('[' (exp+=Expression)? ']') )*;
-
-__ID_Type returns Type:
-	name=(TYPES | __ID_NAT | __ID_CLS_ADT);
-
-ExpList returns __Exp:
-	Expression ({ExpList.first=current}',' next=Expression)*
+PrimaryExpression returns Expression:
+	'(' Expression ')'
+	| __ID_VAR
+	| __ID_NAT
+	| Number
 ;
 
 Finally:
-	val=INT//Block
+	val=INT
 ;
+
+Number:
+	INT | FLOAT | HEX | 'true' | 'false';
+	
+__ID_Type:
+	name=(TYPES | __ID_NAT | __ID_CLS_ADT);
 
 terminal TYPES:
 	'bool' | 'byte' | 'char' | 'f32' | 'f64' | 'float' | 'int' | 's16' | 's32' | 's64' | 's8' | 'u16' | 'u32' | 'u64' |
@@ -167,103 +193,3 @@ terminal fragment ALPHANUM_L: // ALPHANUM
 
 terminal fragment ALPHANUM_S: // alphanum
 	'a'..'z' | '_' | '0'..'9';
-/*
-__8 returns __Exp:
-	__9 ({OperationBinary.operandLeft=current} operator=('+' | '-') operandRight=__9)*;
-
-__9 returns __Exp:
-	__10 ({OperationBinary.operandLeft=current} operator=('*' | '/' | '%') operandRight=__10)*;
-
-__10 returns __Exp:
-//	( {OperationUnary} ( operators+=('not' | '-' | '+' | '~' | '*' | '&&' | '&' | '$$' | '$') | ('(' cast+=__Cast ')') )+ operand=__11 )
-//	| __11;
-	( operators+=('not' | '-' | '+' | '~' | '*' | '&&' | '&' | '$$' | '$') | ('(' cast+=__Cast ')') )* operand=__11;
-
-__11 returns __Exp:
-	__12
-	( 
-		( '(' (expList+=ExpList)? ')' ('finalize' 'with' finally+=Finally 'end')? ) |
-		( '[' exps+=__Exp ']' ) |
-		( (':' | '.') __ID_FIELD ) |
-		'?' | '!'
-	)*
-;
-__12 returns __Exp:
-	__Prim
-;
-__Prim returns __Exp:
-	( '(' __Exp ')' )
-	//| a=Sizeof
-	//| Var
-	| Nat
-	//| NULL
-	//| Number
-	//| STRING
-	//| Global
-	//| This
-	//| Outer
-	//| RawExp
-	//| Vector_constr
-	//| ('call' __Exp)
-	//| ('call/rec' __Exp)
-;
-
-__Cast returns __Exp:
-	Type | {Annotation} name=('@nohold' | '@plain' | '@pure');
-	
-Sizeof returns __Exp:
-	'sizeof' '(' (=>Type | __Exp) ')'
-;
-Number:
-	INT | FLOAT | HEX | 'true' | 'false';
-
-Var:
-	__ID_VAR
-;
-Nat:
-	__ID_NAT
-;
-NULL:
-	'null'
-;
-Global:
-	'global'
-;
-This:
-	'this'
-;
-Outer:
-	'outer'
-;
-RawExp:
-	'{' __raw '}'
-;
-
-__raw: // TODO
-	'c-code'
-;
-Vector_constr:
-	tups+=Vector_tup ( '..' (tups+=Vector_tup | exps+=__Exp) )*
-;
-
-Vector_tup:
-	'[' ExpList ']'
-;
-
-Type:
-	__ID_Type ( '&&' | '&' | '?' | ('[' (exp+=__Exp)? ']') )*;
-
-__ID_Type returns Type:
-	name=(TYPES | __ID_NAT | __ID_CLS_ADT);
-
-ExpList returns __Exp:
-	__Exp ({ExpList.first=current}',' next=__Exp)*
-;
-
-Finally:
-	val=INT//Block
-;
-
-
-
-	*/
